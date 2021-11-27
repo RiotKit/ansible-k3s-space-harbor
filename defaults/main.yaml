@@ -18,6 +18,11 @@ cluster_api_bind_address: "0.0.0.0"
 cluster_api_restrict_access:  # todo restrict access on iptables/ufw
     - "{{ net_cluster_cidr }}"
     - "{{ vpn_cidr }}"
+    - "{{ net_services_cidr }}"
+administrative_services_restrict_access: # restrict access by subnet/ip to ArgoCD and other administrative services
+    - "{{ net_cluster_cidr }}"
+    - "{{ vpn_cidr }}"
+    - "{{ net_services_cidr }}"
 node_labels: ""
 node_taints: ""
 
@@ -235,3 +240,8 @@ mail_relay_password: ""
 #  Sealed Secrets
 # ================
 vault_enabled: true
+
+# ====================
+#  Telegraf - metrics
+# ====================
+telegraf_enabled: true

@@ -17,6 +17,20 @@ spec:
     basicAuth:
         secret: argocd-basicauth
 
+
+{% if administrative_services_restrict_access %}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+    name: argocd-ip-whitelist
+    namespace: {{ argocd_namespace }}
+spec:
+    ipWhiteList:
+        sourceRange:
+            {{ administrative_services_restrict_access | to_nice_yaml | indent(12) }}
+{%- endif %}
+
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
@@ -37,6 +51,10 @@ spec:
           middlewares:
               - name: argocd-basicauth
                 namespace: {{ argocd_namespace }}
+{% if administrative_services_restrict_access %}
+              - name: argocd-ip-whitelist
+                namespace: {{ argocd_namespace }}
+{%- endif %}
 
         - kind: Rule
           match: Host(`{{ argocd_subdomain }}.{{ main_domain }}`) && Headers(`Content-Type`, `application/grpc`)

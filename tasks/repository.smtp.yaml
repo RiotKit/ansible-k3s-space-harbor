@@ -1,6 +1,12 @@
-- name: Create SMTP gateway definition
-  template:
-      src: "repository/{{ item }}"
-      dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
-  with_items:
-      - root/smtp.yaml.j2
+- name: Check if SMTP gateway was already configred
+  stat: path=/tmp/git-repository/root/smtp.yaml.j2
+  register: smtp_confiured
+
+- when: git_recreate_smtp or not smtp_confiured.stat.exists
+  block:
+      - name: Create SMTP gateway definition
+        template:
+            src: "repository/{{ item }}"
+            dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
+        with_items:
+            - root/smtp.yaml.j2

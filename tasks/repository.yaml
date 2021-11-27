@@ -1,9 +1,11 @@
 - name: Create temporary directory for git repository preparation
+  tags: ['git']
   file:
       path: /tmp/git-repository
       state: directory
 
 - name: Write GIT configuration key
+  tags: ['git']
   copy:
       content: "{{ cluster_git_repository.deployment_time_access_key }}"
       dest: "/tmp/.rkt-git.rsa"
@@ -11,6 +13,7 @@
 
 - block:
     - name: Clone
+      tags: ['git']
       git:
           key_file: "/tmp/.rkt-git.rsa"
           repo: "{{ cluster_git_repository.remote }}"
@@ -24,9 +27,11 @@
           GIT_ASKPASS: "/usr/bin/true"
 
     - name: Prepare git identity
+      tags: ['git']
       shell: "cd /tmp/git-repository; git config --local user.name 'Ansible @ Riotkit Role'; git config --local user.email 'example@example.org'"
 
     - name: Create directories
+      tags: ['git']
       file:
           dest: "/tmp/git-repository/{{ item }}"
           state: directory
@@ -36,40 +41,61 @@
           - root
 
     - name: Encode ArgoCD basic auth password
+      tags: ['git']
       shell: "openssl passwd -apr1 '{{ argocd_basic_auth.password }}'"
       register: argocd_basic_auth_password_encoded_apr1
 
     - include: repository.infracheck.yaml
+      tags: ['git_infracheck']
       when: infracheck_enabled
+
     - include: repository.smtp.yaml
+      tags: ['git_smtp']
       when: mail_enabled
-    #- include: repository.telegraf.yaml
+
+    - include: repository.telegraf.yaml
+      tags: ['git_telegraf']
+      when: telegraf_enabled
+
     - include: repository.vault.yaml
+      tags: ['git_vault']
       when: vault_enabled
 
-    - name: Create files from templates
+    - name: Create ArgoCD files from templates
+      tags: ['git_argocd']
       template:
           src: "repository/{{ item }}"
           dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
       with_items:
           - apps/argocd/ingress.yaml.j2
-          - root/traefik.yaml.j2
           - root/argocd-ingress.yaml.j2
 
+    - name: Create files from templates
+      tags: ['git_traefik']
+      template:
+          src: "repository/{{ item }}"
+          dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
+      with_items:
+          - root/traefik.yaml.j2
+
     - name: Commit changes
+      tags: ['git']
       shell: "cd /tmp/git-repository && git add . && git commit -m 'k3s-riotkit update' || true"
 
     - name: Push changes
+      tags: ['git']
       shell: "cd /tmp/git-repository && git push --force"
       environment:
           GIT_SSH_COMMAND: 'ssh -i /tmp/.rkt-git.rsa'
   always:
       - name: Delete repository key
+        tags: ['git']
         file:
             path: "/tmp/.rkt-git.rsa"
             state: absent
 
       - name: Delete repository directory
+        tags: ['git']
         file:
             path: /tmp/git-repository
             state: absent
