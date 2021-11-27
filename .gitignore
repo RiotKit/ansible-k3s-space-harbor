@@ -1,6 +1,0 @@
-playbook.yaml
-hosts.cfg
-inventory/
-/artifacts/*
-!/artifacts/README.md
-!/artifacts/.gitkeep
