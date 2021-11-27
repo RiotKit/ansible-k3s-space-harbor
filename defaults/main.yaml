@@ -2,20 +2,20 @@
 #  Main settings
 # =====================
 
-k3s_version: "v1.22.3+k3s1"
-argocd_version: "v2.1.7"
-main_domain: "example.org"
+k3s_version: "v1.22.3+k3s1"  # https://github.com/k3s-io/k3s/releases
+argocd_version: "v2.1.7"     # https://github.com/argoproj/argo-cd/releases
+main_domain: "example.org"   # main public DNS domain of your cluster. All services will be exposed as subdomains under this domain
 timezone: "Europe/Warsaw"
-force_k3s_upgrade: false
-vpn_enabled: true
-flannel_iface: wg0
+force_k3s_upgrade: false     # set this from CLI "-e force_k3s_upgrade=true" to upgrade the cluster with Ansible
+vpn_enabled: true            # communicate between cluster nodes over VPN, K3S will use {{ flannel_iface }} as main interface when vpn_enabled=true
+flannel_iface: wg0           # set this per node if you have multiple VPN interfaces
 
 # configure, if you have multiple clusters and access them by same network/VPN
 net_cluster_cidr: "10.42.0.0/16"
 net_services_cidr: "10.43.0.0/16"
 cluster_data_path: "/var/lib/rancher/k3s"
-cluster_api_bind_address: "0.0.0.0"  # by default bind on VPN interface. Leave empty if not using VPN
-cluster_api_restrict_access:  # todo
+cluster_api_bind_address: "0.0.0.0"
+cluster_api_restrict_access:  # todo restrict access on iptables/ufw
     - "{{ net_cluster_cidr }}"
     - "{{ vpn_cidr }}"
 node_labels: ""
@@ -33,10 +33,10 @@ cluster_git_repository:
 # ========
 #  ArgoCD
 # ========
-argocd_git_port: "22"
-argocd_git_host: "github.com"
-argocd_namespace: "argocd"
-argocd_subdomain: "cd"
+argocd_git_port: "22"            # same port as in cluster_git_repository.remote option
+argocd_git_host: "github.com"    # same host as in cluster_git_repository.remote option
+argocd_namespace: "argocd"       # better to not change
+argocd_subdomain: "cd"           # subdomain - will be e.g. cd.example.org ({{ argocd_subdomain }}.{{ main_domain }})
 argocd_admin_password: "change-this-password-quickly"
 argocd_basic_auth:
     username: riotkit
@@ -46,11 +46,12 @@ argocd_helm_settings: {}
 argocd_defaults:
     controller:
         args:
-            statusProcessors: "10"
-            operationProcessors: "6"
+            # adjust those values to higher ones if your cluster has more applications
+            statusProcessors: "5"
+            operationProcessors: "4"
             appResyncPeriod: "3600"
             selfHealTimeout: "25"
-            repoServerTimeoutSeconds: "300"
+            repoServerTimeoutSeconds: "600"
     dex:
         enabled: false
     server:
@@ -60,6 +61,9 @@ argocd_defaults:
             ui.bannercontent: Brought to you by Open Source work of anarchist tech-collective - Riotkit
             ui.bannerUrl: https://github.com/riotkit
             url: "https://{{ argocd_subdomain }}.{{ main_domain }}"
+
+    # ingress is disabled by default because we have a separate definition created especially for Traefik with
+    # additional wall of Basic Auth
     ingress:
         enabled: false
     ingressGrpc:
@@ -68,6 +72,9 @@ argocd_defaults:
     configs:
         knownHosts:
             data:
+                #
+                # ArgoCD requires to have a collection of public SSH keys of remote git repositories it is going to pull
+                #
                 ssh_known_hosts: |
                     bitbucket.org ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAubiN81eDcafrgMeLzaFPsw2kNvEcqTKl/VqLat/MaB33pZy0y3rJZtnqwR2qOOvbwKZYKiEO1O6VqNEBxKvJJelCq0dTXWT5pbO2gDXC6h6QDXCaHo6pOHGPUy+YBaGQRGuSusMEASYiWunYN0vCAI8QaXnWMXNMdFP3jHAJH0eDsoiGnLPBlBp4TNm6rYI74nMzgz3B9IikW4WVK+dc8KZJZWYjAuORU3jc1c/NPskD2ASinf8v3xnfXeukU0sJ5N6m5E8VLjObPEO+mN2t/FZTMZLiFqPWc/ALSqnMnnhwrNi2rbfg/rd/IpL8Le3pSBne8+seeFVBoGqzHM9yXw==
                     github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
@@ -79,9 +86,17 @@ argocd_defaults:
                     {{ ssh_known_host_results.stdout }}
 
         credentialTemplates:
+            #
+            # Read-only access to GIT repository is required using a private key
+            # Hint: Create a service account in Github, Gitea, Gitlab, etc.
+            #
             ssh-creds:
                 url: "{{ cluster_git_repository.remote }}"
                 sshPrivateKey: "{{ cluster_git_repository.argocd_read_only_access_key }}"
+
+        #
+        # List of enabled GIT repositories to be watched by ArgoCD
+        #
         repositories:
             riotkit-cluster-root:
                 url: "{{ cluster_git_repository.remote }}"
@@ -90,8 +105,8 @@ argocd_defaults:
 # ============================
 #  Tools installed on machine
 # ============================
-tool_helm_version: "v3.7.1"
-tool_kubeseal_version: "v0.16.0"
+tool_helm_version: "v3.7.1"       # https://github.com/helm/helm/releases
+tool_kubeseal_version: "v0.16.0"  # https://github.com/bitnami-labs/sealed-secrets/releases (notice: only versions with released asset "kubeseal-linux-amd64")
 
 
 # =====================
