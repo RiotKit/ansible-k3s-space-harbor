@@ -43,6 +43,7 @@ argocd_git_host: "github.com"    # same host as in cluster_git_repository.remote
 argocd_namespace: "argocd"       # better to not change
 argocd_subdomain: "cd"           # subdomain - will be e.g. cd.example.org ({{ argocd_subdomain }}.{{ main_domain }})
 argocd_admin_password: "change-this-password-quickly"
+argocd_old_password: "{{ argocd_admin_password }}"    # set in case, when you are changing passwords
 argocd_basic_auth:
     username: riotkit
     password: riotkit

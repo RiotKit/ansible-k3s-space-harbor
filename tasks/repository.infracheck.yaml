@@ -1,6 +1,12 @@
-- name: Create Infracheck definition
-  template:
-      src: "repository/{{ item }}"
-      dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
-  with_items:
-      - root/infracheck.yaml.j2
+- name: Check if Infracheck was already configred
+  stat: path=/tmp/git-repository/root/infracheck.yaml.j2
+  register: infracheck_configured
+
+- when: '"git_infracheck" in ansible_run_tags or not infracheck_configured.stat.exists'
+  block:
+      - name: Create Infracheck definition
+        template:
+            src: "repository/{{ item }}"
+            dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
+        with_items:
+            - root/infracheck.yaml.j2

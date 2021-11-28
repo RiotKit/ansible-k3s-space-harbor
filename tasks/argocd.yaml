@@ -33,6 +33,7 @@
         shell: "helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm --create-namespace --values /tmp/argocd-initial-values.yaml --namespace {{ argocd_namespace }} --wait"
 
       - name: Create a kubectl proxy background service to expose ArgoCD API for deployment time
+        tags: ['sync']
         template:
             src: "etc/systemd/system/argocd-api-proxy.service"
             dest: "/etc/systemd/system/argocd-api-proxy.service"
@@ -41,6 +42,7 @@
             mode: 0640
 
       - name: "Forward ArgoCD to localhost:8080"
+        tags: ['sync']
         systemd:
             state: restarted
             name: "argocd-api-proxy"
@@ -49,6 +51,7 @@
 
       # wait for ArgoCD to be ready
       - name: "Wait for ArgoCD to be up and ready"
+        tags: ['sync']
         command: "curl http://localhost:8080 -k -s --head"
         register: result
         until: result.stdout.find("200 OK") != -1
@@ -57,22 +60,22 @@
         changed_when: false
 
       - name: "Get initial secret password"
+        tags: ['sync']
         shell: 'kubectl -n {{ argocd_namespace }} get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d'
         register: "initial_admin_secret"
 
-      - block:
-            - name: "Login to ArgoCD"
-              shell: "argocd --plaintext login localhost:8080 --username=admin --password='{{ argocd_admin_password }}' --insecure"
-        rescue:
-            - name: "Retry login to ArgoCD (using initial password)"
-              shell: "argocd --plaintext login localhost:8080 --username=admin --password='{{ initial_admin_secret.stdout | trim }}' --insecure"
+      - name: "Login to ArgoCD"
+        tags: ['sync']
+        shell: |
+            argocd --plaintext login localhost:8080 --username=admin --password='{{ argocd_admin_password }}' --insecure \
+              || argocd --plaintext login localhost:8080 --username=admin --password='{{ argocd_old_password }}' --insecure \
+              || argocd --plaintext login localhost:8080 --username=admin --password='{{ initial_admin_secret.stdout | trim }}' --insecure
 
-      - block:
-            - name: "Change password"
-              shell: "argocd account update-password --current-password='{{ argocd_admin_password }}' --new-password='{{ argocd_admin_password }}'"
-        rescue:
-            - name: "Retry password change (using initial password)"
-              shell: "argocd account update-password --current-password='{{ initial_admin_secret.stdout | trim }}' --new-password='{{ argocd_admin_password }}'"
+      - name: "Change password"
+        shell: |
+            argocd account update-password --current-password='{{ argocd_admin_password }}' --new-password='{{ argocd_admin_password }}' \
+              || argocd account update-password --current-password='{{ argocd_old_password }}' --new-password='{{ argocd_admin_password }}' \
+              || argocd account update-password --current-password='{{ initial_admin_secret.stdout | trim }}' --new-password='{{ argocd_admin_password }}'
 
       - name: "Copy read-only GIT key"
         copy:
@@ -88,6 +91,7 @@
         until: root_creation.rc == 0
 
       - name: "Install 'root' - a repository with declarations'"
+        tags: ['sync']
         shell: "argocd --plaintext app sync root"
         retries: 25
         delay: 3
@@ -95,27 +99,32 @@
         until: root_sync.rc == 0
 
       - name: "Install Traefik"
+        tags: ['sync']
         shell: "argocd --plaintext app sync traefik --prune"
         retries: 25
-        delay: 3
+        delay: 8
         register: traefik_sync
         until: traefik_sync.rc == 0
 
       - name: "Install ArgoCD ingress route"
+        tags: ['sync']
         shell: "argocd --plaintext app sync argocd-ingress --prune"
         retries: 25
-        delay: 3
+        delay: 8
         register: traefik_sync
         until: traefik_sync.rc == 0
 
       - include: argocd.smtp.yaml
+        tags: ['sync']
         when: mail_enabled
 
       - include: argocd.vault.yaml
+        tags: ['sync']
         when: vault_enabled
 
   always:
       - name: "Turn off ArgoCD port forwarding"
+        tags: ['sync']
         systemd:
             state: stopped
             name: "argocd-api-proxy"
