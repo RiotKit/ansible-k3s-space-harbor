@@ -57,10 +57,6 @@
       tags: ['git_telegraf']
       when: telegraf_enabled
 
-    - include: repository.vault.yaml
-      tags: ['git_vault']
-      when: vault_enabled
-
     - name: Create ArgoCD files from templates
       tags: ['git_argocd']
       template:

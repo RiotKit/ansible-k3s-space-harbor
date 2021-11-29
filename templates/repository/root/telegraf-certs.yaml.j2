@@ -1,0 +1,18 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+    name: telegraf-certs
+    namespace: argocd
+spec:
+    project: default
+    source:
+        repoURL: {{ cluster_git_repository.remote }}
+        targetRevision: HEAD
+        path: apps/telegraf-certs
+    destination:
+        server: https://kubernetes.default.svc
+        namespace: telegraf
+    syncPolicy:
+        syncOptions:
+            - CreateNamespace=true

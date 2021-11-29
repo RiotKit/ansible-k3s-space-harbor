@@ -1,7 +1,3 @@
-- include: repository.yaml
-  tags: repository
-  when: node_type == "primary"
-
 - include: tools.yaml
   tags: tools
 
@@ -13,6 +9,14 @@
   tags: ['cluster', 'k3s']
   when: node_type == "compute"
 
+- include: sealed_secrets.yaml
+  tags: sealed_secrets
+  when: node_type == "primary"
+
+- include: repository.yaml
+  tags: repository
+  when: node_type == "primary"
+
 - include: argocd.yaml
   tags: argocd
-  when: node_type == "primary"
+  when: node_type == "primary" and secrets_enabled

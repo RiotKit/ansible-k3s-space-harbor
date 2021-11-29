@@ -2,8 +2,13 @@
 #  Main settings
 # =====================
 
-k3s_version: "v1.22.3+k3s1"  # https://github.com/k3s-io/k3s/releases
-argocd_version: "v2.1.7"     # https://github.com/argoproj/argo-cd/releases
+k3s_version: "v1.22.3+k3s1"      # https://github.com/k3s-io/k3s/releases
+argocd_cli_version: "v2.1.7"     # https://github.com/argoproj/argo-cd/releases
+argocd_chart_version: "3.26.11"  # https://artifacthub.io/packages/helm/argo/argo-cd
+secrets_version: "1.16.1"        # https://artifacthub.io/packages/helm/bitnami-labs/sealed-secrets
+telegraf_chart_version: "1.8.6"  # https://artifacthub.io/packages/helm/influxdata/telegraf
+traefik_chart_version: "10.6.2"  # https://artifacthub.io/packages/helm/traefik/traefik
+
 main_domain: "example.org"   # main public DNS domain of your cluster. All services will be exposed as subdomains under this domain
 timezone: "Europe/Warsaw"
 force_k3s_upgrade: false     # set this from CLI "-e force_k3s_upgrade=true" to upgrade the cluster with Ansible
@@ -120,7 +125,6 @@ tool_kubeseal_version: "v0.16.0"  # https://github.com/bitnami-labs/sealed-secre
 # =====================
 traefik_subdomain: "traefik"
 traefik_password: "riotkit"
-traefik_chart_version: "1.81.0"
 traefik_tls_staging: "true"
 traefik_tls_email: "example@example.org"
 
@@ -240,9 +244,15 @@ mail_relay_password: ""
 # ================
 #  Sealed Secrets
 # ================
-vault_enabled: true
+secrets_enabled: true
+secrets_namespace: "kube-system"
 
 # ====================
 #  Telegraf - metrics
 # ====================
 telegraf_enabled: true
+telegraf_agent_interval: "120s"
+telegraf_certs:
+    ca_crt: ...
+    tls_crt: ...
+    tls_key: ...

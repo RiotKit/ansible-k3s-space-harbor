@@ -1,0 +1,67 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+    name: telegraf
+    namespace: argocd
+spec:
+    project: default
+    source:
+        helm:
+            releaseName: telegraf
+            values: |
+                env:
+                    - name: HOSTNAME
+                      value: "{{ main_domain }}"
+                volumeMounts:
+                    - name: certs
+                      mountPath: /mnt/riotkit-certs
+                      readOnly: true
+                volumes:
+                    - name: certs
+                      secret:
+                          secretName: "telegraf-tls-auth-certs"
+                resources:
+                    requests:
+                        cpu: 0
+                        memory: 32Mi
+                    limits:
+                        cpu: 0.1
+                        memory: 64Mi
+
+                # run only on primary node
+                affinity:
+                    nodeAffinity:
+                        requiredDuringSchedulingIgnoredDuringExecution:
+                            nodeSelectorTerms:
+                                - matchExpressions:
+                                    - key: node-role.kubernetes.io/control-plane
+                                      operator: In
+                                      values:
+                                          - true
+
+                config:
+                    agent:
+                        interval: "{{ telegraf_agent_interval }}"
+                        flush_interval: "{{ telegraf_agent_interval }}"
+                    inputs:
+                        - kubernetes:
+                              url: "http://127.0.0.1:10255"
+                    outputs:
+                        - socket_writer:
+                              address: "tcp://ts.riotkit.org:8094"
+                              tls_ca: "/mnt/riotkit-certs/ca.crt"
+                              tls_cert: "/mnt/riotkit-certs/tls.crt"
+                              tls_key: "/mnt/riotkit-certs/tls.key"
+                              insecure_skip_verify: "true"
+                              data_format: "influx"
+
+        targetRevision: {{ telegraf_chart_version }}
+        chart: telegraf
+        repoURL: https://helm.influxdata.com/
+    destination:
+        server: https://kubernetes.default.svc
+        namespace: telegraf
+    syncPolicy:
+        syncOptions:
+            - CreateNamespace=true

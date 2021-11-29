@@ -5,7 +5,7 @@
   block:
       - name: Install argocd CLI
         get_url:
-            url: "https://github.com/argoproj/argo-cd/releases/download/{{ argocd_version }}/argocd-linux-amd64"
+            url: "https://github.com/argoproj/argo-cd/releases/download/{{ argocd_cli_version }}/argocd-linux-amd64"
             dest: /usr/local/bin/argocd
             mode: "u+rwx,g+rx,o+rx"
 
@@ -30,7 +30,13 @@
             dest: "/tmp/argocd-initial-values.yaml"
 
       - name: Install ArgoCD using Helm
-        shell: "helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm --create-namespace --values /tmp/argocd-initial-values.yaml --namespace {{ argocd_namespace }} --wait"
+        shell: |
+            helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm \
+                --create-namespace \
+                --values /tmp/argocd-initial-values.yaml \
+                --namespace {{ argocd_namespace }} \
+                --version={{ argocd_chart_version }} \
+                --wait
 
       - name: Create a kubectl proxy background service to expose ArgoCD API for deployment time
         tags: ['sync']
@@ -118,9 +124,9 @@
         tags: ['sync']
         when: mail_enabled
 
-      - include: argocd.vault.yaml
+      - include: argocd.telegraf.yaml
         tags: ['sync']
-        when: vault_enabled
+        when: telegraf_enabled
 
   always:
       - name: "Turn off ArgoCD port forwarding"
