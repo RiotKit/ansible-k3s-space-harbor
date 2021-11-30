@@ -10,6 +10,41 @@ spec:
         helm:
             releaseName: telegraf
             values: |
+                rbac:
+                    clusterWide: true
+                    rules:
+                          - apiGroups:
+                                - ""
+                            resources:
+                                - nodes
+                                - nodes/proxy
+                                - nodes/metrics
+                                - services
+                                - endpoints
+                                - pods
+                                - ingresses
+                                - configmaps
+                            verbs:
+                                - get
+                                - list
+                                - watch
+                          - apiGroups:
+                                - "extensions"
+                            resources:
+                                - ingresses/status
+                                - ingresses
+                            verbs:
+                                - get
+                                - list
+                                - watch
+                          - nonResourceURLs:
+                                - "/metrics"
+                                - "/stats/summary"
+                            verbs:
+                                - get
+                serviceAccount:
+                    create: true
+                    name: telegraf
                 env:
                     - name: HOSTNAME
                       value: "{{ main_domain }}"
@@ -28,6 +63,8 @@ spec:
                     limits:
                         cpu: 0.1
                         memory: 64Mi
+                service:
+                    enabled: false
 
                 # run only on primary node
                 affinity:
@@ -38,22 +75,29 @@ spec:
                                     - key: node-role.kubernetes.io/control-plane
                                       operator: In
                                       values:
-                                          - true
+                                          - "true"
 
                 config:
                     agent:
                         interval: "{{ telegraf_agent_interval }}"
                         flush_interval: "{{ telegraf_agent_interval }}"
                     inputs:
-                        - kubernetes:
-                              url: "http://127.0.0.1:10255"
+                        - kube_inventory:
+                              url: "https://$HOSTIP:6443"
+                              bearer_token: "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                              insecure_skip_verify: true
+                              resource_include:
+                                  - nodes
+                                  - deployments
+                                  - services
+                                  - statefulsets
                     outputs:
                         - socket_writer:
-                              address: "tcp://ts.riotkit.org:8094"
+                              address: "{{ telegraf_socket_writer_address }}"
                               tls_ca: "/mnt/riotkit-certs/ca.crt"
                               tls_cert: "/mnt/riotkit-certs/tls.crt"
                               tls_key: "/mnt/riotkit-certs/tls.key"
-                              insecure_skip_verify: "true"
+                              insecure_skip_verify: true
                               data_format: "influx"
 
         targetRevision: {{ telegraf_chart_version }}

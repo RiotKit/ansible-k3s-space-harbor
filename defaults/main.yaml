@@ -252,6 +252,7 @@ secrets_namespace: "kube-system"
 # ====================
 telegraf_enabled: true
 telegraf_agent_interval: "120s"
+telegraf_socket_writer_address: "tcp://example.org:8094"
 telegraf_certs:
     ca_crt: ...
     tls_crt: ...
