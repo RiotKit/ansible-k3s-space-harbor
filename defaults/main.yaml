@@ -61,10 +61,30 @@ argocd_defaults:
             statusProcessors: "5"
             operationProcessors: "4"
             appResyncPeriod: "3600"
-            selfHealTimeout: "25"
+            selfHealTimeout: "45"
             repoServerTimeoutSeconds: "600"
+        affinity:
+            nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                        - matchExpressions:
+                            - key: node-role.kubernetes.io/control-plane
+                              operator: In
+                              values:
+                                  - "true"
     dex:
         enabled: false
+
+    redis:
+        affinity:
+            nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                        - matchExpressions:
+                            - key: node-role.kubernetes.io/control-plane
+                              operator: In
+                              values:
+                                  - "true"
     server:
         extraArgs: ['--insecure']
         config:
@@ -72,6 +92,16 @@ argocd_defaults:
             ui.bannercontent: Brought to you by Open Source work of anarchist tech-collective - Riotkit
             ui.bannerUrl: https://github.com/riotkit
             url: "https://{{ argocd_subdomain }}.{{ main_domain }}"
+        affinity:
+            nodeAffinity:
+                requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                        - matchExpressions:
+                            - key: node-role.kubernetes.io/control-plane
+                              operator: In
+                              values:
+                                  - "true"
+
 
     # ingress is disabled by default because we have a separate definition created especially for Traefik with
     # additional wall of Basic Auth
