@@ -14,25 +14,38 @@ spec:
                     clusterWide: true
                     rules:
                           - apiGroups:
-                                - ""
+                                - "networking.k8s.io"
                             resources:
-                                - nodes
-                                - nodes/proxy
-                                - nodes/metrics
-                                - services
-                                - endpoints
-                                - pods
                                 - ingresses
-                                - configmaps
                             verbs:
                                 - get
                                 - list
                                 - watch
                           - apiGroups:
-                                - "extensions"
+                                - "apps"
                             resources:
+                                - statefulsets
+                                - deployments
+                                - daemonsets
+                                - endpoints
+                                - ingresses
+                            verbs:
+                                - get
+                                - list
+                                - watch
+                          - apiGroups:
+                                - ""
+                            resources:
+                                - persistentvolumes
+                                - persistentvolumeclaims
+                                - endpoints
                                 - ingresses/status
                                 - ingresses
+                                - services
+                                - pods
+                                - nodes
+                                - nodes/proxy
+                                - nodes/metrics
                             verbs:
                                 - get
                                 - list
@@ -83,14 +96,15 @@ spec:
                         flush_interval: "{{ telegraf_agent_interval }}"
                     inputs:
                         - kube_inventory:
-                              url: "https://$HOSTIP:6443"
+                              url: "https://{{ vpn_primary_node_ip }}:6443"
                               bearer_token: "/var/run/secrets/kubernetes.io/serviceaccount/token"
                               insecure_skip_verify: true
-                              resource_include:
-                                  - nodes
-                                  - deployments
-                                  - services
-                                  - statefulsets
+                              resource_exclude: ['configmaps']
+                              #resource_include:
+                              #    - nodes
+                              #    - deployments
+                              #    - services
+                              #    - statefulsets
                     outputs:
                         - socket_writer:
                               address: "{{ telegraf_socket_writer_address }}"
