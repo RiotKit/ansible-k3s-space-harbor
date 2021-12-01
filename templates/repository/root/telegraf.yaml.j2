@@ -22,9 +22,10 @@ spec:
                         flush_interval: "{{ telegraf_agent_interval }}"
                         metric_batch_size: 1000
                         metric_buffer_limit: 10000
-                        hostname: "{{ main_domain }}-$HOSTNAME"
+                        hostname: "{{ main_domain }}-$NODENAME"
                     inputs:
                         enableDocker: false
+                        disabledInputs: ["diskio", "kernel", "system", "swap", "processes"]
                         mem: |
                             taginclude = ["host"]
                             fieldpass = ["used_percent", "used", "total", "available", "available_percent", "cached"]
