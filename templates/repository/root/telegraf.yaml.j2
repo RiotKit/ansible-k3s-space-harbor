@@ -16,6 +16,10 @@ spec:
                 env:
                     - name: MAIN_DOMAIN
                       value: "{{ main_domain }}"
+                    - name: NODENAME
+                      valueFrom:
+                          fieldRef:
+                              fieldPath: spec.nodeName
                 config:
                     agent:
                         interval: "{{ telegraf_agent_interval }}"
@@ -60,15 +64,6 @@ spec:
                     - name: certs
                       secret:
                           secretName: "telegraf-tls-auth-certs"
-                affinity:
-                    nodeAffinity:
-                        requiredDuringSchedulingIgnoredDuringExecution:
-                            nodeSelectorTerms:
-                                - matchExpressions:
-                                    - key: node-role.kubernetes.io/control-plane
-                                      operator: In
-                                      values:
-                                          - "true"
 
     destination:
         server: https://kubernetes.default.svc
