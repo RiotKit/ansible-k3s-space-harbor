@@ -2,12 +2,12 @@
 #  Main settings
 # =====================
 
-k3s_version: "v1.22.3+k3s1"      # https://github.com/k3s-io/k3s/releases
-argocd_cli_version: "v2.1.7"     # https://github.com/argoproj/argo-cd/releases
-argocd_chart_version: "3.26.11"  # https://artifacthub.io/packages/helm/argo/argo-cd
-secrets_version: "1.16.1"        # https://artifacthub.io/packages/helm/bitnami-labs/sealed-secrets
-telegraf_chart_version: "1.8.6"  # https://artifacthub.io/packages/helm/influxdata/telegraf
-traefik_chart_version: "10.6.2"  # https://artifacthub.io/packages/helm/traefik/traefik
+k3s_version: "v1.22.3+k3s1"       # https://github.com/k3s-io/k3s/releases
+argocd_cli_version: "v2.1.7"      # https://github.com/argoproj/argo-cd/releases
+argocd_chart_version: "3.26.11"   # https://artifacthub.io/packages/helm/argo/argo-cd
+secrets_version: "1.16.1"         # https://artifacthub.io/packages/helm/bitnami-labs/sealed-secrets
+telegraf_chart_version: "1.0.24"  # https://artifacthub.io/packages/helm/influxdata/telegraf
+traefik_chart_version: "10.6.2"   # https://artifacthub.io/packages/helm/traefik/traefik
 
 main_domain: "example.org"   # main public DNS domain of your cluster. All services will be exposed as subdomains under this domain
 timezone: "Europe/Warsaw"
