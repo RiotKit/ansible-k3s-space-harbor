@@ -89,8 +89,13 @@
             dest: "/tmp/.rkt-ro-git.rsa"
             mode: "0600"
 
+      - name: Render root.yaml
+        template:
+            src: repository/root.yaml.j2
+            dest: /tmp/root.yaml
+
       - name: "Add 'root' application that enables all other applications'"
-        shell: "argocd --plaintext app create root --insecure --repo {{ cluster_git_repository.remote }} --path root --dest-namespace {{ argocd_namespace }} --dest-server https://kubernetes.default.svc --directory-recurse --upsert"
+        shell: "kubectl apply -f /tmp/root.yaml"
         retries: 10
         delay: 3
         register: root_creation

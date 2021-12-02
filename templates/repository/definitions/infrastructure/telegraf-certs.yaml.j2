@@ -5,11 +5,11 @@ metadata:
     name: telegraf-certs
     namespace: argocd
 spec:
-    project: default
+    project: infrastructure
     source:
         repoURL: {{ cluster_git_repository.remote }}
         targetRevision: HEAD
-        path: apps/telegraf-certs
+        path: src/telegraf-certs
     destination:
         server: https://kubernetes.default.svc
         namespace: telegraf

@@ -1,0 +1,80 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: applications
+  namespace: argocd
+spec:
+    description: 'Applications from "definitions/applications" ({{ cluster_git_repository.remote }})'
+    clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+    destinations:
+        - namespace: '*'
+          server: '*'
+    sourceRepos:
+        - '*'
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infrastructure
+  namespace: argocd
+spec:
+    description: 'Applications from "definitions/infrastructure ({{ cluster_git_repository.remote }})'
+    clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+    destinations:
+        - namespace: 'infracheck'
+          server: '*'
+        - namespace: 'mail'
+          server: '*'
+        - namespace: 'telegraf'
+          server: '*'
+        - namespace: 'kube-system'
+          server: '*'
+        - namespace: 'argocd'
+          server: '*'
+        - namespace: 'traefik'
+          server: '*'
+    sourceRepos:
+        - '*'
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  namespace: argocd
+spec:
+    description: 'Should contain only "root" application that synchronizes other definitions from "definitions/*" directory in repository'
+    clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+    destinations:
+        - namespace: '*'
+          server: '*'
+    sourceRepos:
+        - '*'
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+    name: root
+    namespace: {{ argocd_namespace }}
+    finalizers:
+        - resources-finalizer.argocd.argoproj.io
+spec:
+    project: default
+    source:
+        repoURL: '{{ cluster_git_repository.remote }}'
+        path: definitions
+        directory:
+            recurse: true
+            jsonnet: {}
+    destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: argocd

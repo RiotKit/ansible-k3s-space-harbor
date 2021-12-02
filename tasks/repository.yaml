@@ -36,9 +36,12 @@
           dest: "/tmp/git-repository/{{ item }}"
           state: directory
       with_items:
-          - apps
-          - apps/argocd
-          - root
+          - src
+          - src/argocd
+          - src/telegraf-certs
+          - definitions
+          - definitions/infrastructure
+          - definitions/applications
 
     - name: Encode ArgoCD basic auth password
       tags: ['git']
@@ -63,8 +66,8 @@
           src: "repository/{{ item }}"
           dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
       with_items:
-          - apps/argocd/ingress.yaml.j2
-          - root/argocd-ingress.yaml.j2
+          - src/argocd/ingress.yaml.j2
+          - definitions/infrastructure/argocd-ingress.yaml.j2
 
     - name: Create files from templates
       tags: ['git_traefik']
@@ -72,7 +75,8 @@
           src: "repository/{{ item }}"
           dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
       with_items:
-          - root/traefik.yaml.j2
+          - definitions/infrastructure/traefik.yaml.j2
+          - README.md
 
     - name: Commit changes
       tags: ['git']

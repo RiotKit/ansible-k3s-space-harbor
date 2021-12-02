@@ -1,17 +1,11 @@
 ---
-apiVersion: v1
-kind: Namespace
-metadata:
-    name: traefik
-
----
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
     name: traefik
     namespace: argocd
 spec:
-    project: default
+    project: infrastructure
     source:
         helm:
             releaseName: traefik

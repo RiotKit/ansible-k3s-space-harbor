@@ -7,11 +7,11 @@ metadata:
     finalizers:
         - resources-finalizer.argocd.argoproj.io
 spec:
-    project: default
+    project: infrastructure
     source:
         repoURL: {{ cluster_git_repository.remote }}
         targetRevision: HEAD
-        path: apps/argocd
+        path: src/argocd
 
     # Destination cluster and namespace to deploy the application
     destination:

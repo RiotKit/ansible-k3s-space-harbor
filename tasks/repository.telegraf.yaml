@@ -1,29 +1,29 @@
 - name: Check if Telegraf was already configred
-  stat: path=/tmp/git-repository/root/telegraf.yaml.j2
+  stat: path=/tmp/git-repository/definitions/infrastructure/telegraf.yaml.j2
   register: telegraf_configured
 
 - when: '"git_telegraf" in ansible_run_tags or not telegraf_configured.stat.exists'
   block:
       - name: Create directory for certs
         file:
-            path: /tmp/git-repository/apps/telegraf-certs
+            path: /tmp/git-repository/src/telegraf-certs
             state: directory
 
       - name: Create Telegraf plain secret
         template:
-            src: repository/apps/telegraf-certs/secrets.yaml.j2
+            src: repository/src/telegraf-certs/secrets.yaml.j2
             dest: /tmp/.telegraf-secret-plain.yaml
 
       - name: Encrypt Telegraf secret
-        shell: "cat /tmp/.telegraf-secret-plain.yaml | kubeseal --format yaml --cert /etc/rancher/k3s/sealed-secrets.cert.pem > /tmp/git-repository/apps/telegraf-certs/secrets.yaml"
+        shell: "cat /tmp/.telegraf-secret-plain.yaml | kubeseal --format yaml --cert /etc/rancher/k3s/sealed-secrets.cert.pem > /tmp/git-repository/src/telegraf-certs/secrets.yaml"
 
       - name: Create Telegraf definition
         template:
             src: "repository/{{ item }}"
             dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
         with_items:
-            - root/telegraf-certs.yaml.j2
-            - root/telegraf.yaml.j2
+            - definitions/infrastructure/telegraf-certs.yaml.j2
+            - definitions/infrastructure/telegraf.yaml.j2
         vars:
             create_secret: "{{ sealed_secrets_exists.rc == 0 }}"
   always:
