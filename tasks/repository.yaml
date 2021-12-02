@@ -1,11 +1,11 @@
 - name: Create temporary directory for git repository preparation
-  tags: ['git']
+  tags: ['git', 'git_all']
   file:
       path: /tmp/git-repository
       state: directory
 
 - name: Write GIT configuration key
-  tags: ['git']
+  tags: ['git', 'git_all']
   copy:
       content: "{{ cluster_git_repository.deployment_time_access_key }}"
       dest: "/tmp/.rkt-git.rsa"
@@ -13,7 +13,7 @@
 
 - block:
     - name: Clone
-      tags: ['git']
+      tags: ['git', 'git_all']
       git:
           key_file: "/tmp/.rkt-git.rsa"
           repo: "{{ cluster_git_repository.remote }}"
@@ -27,11 +27,11 @@
           GIT_ASKPASS: "/usr/bin/true"
 
     - name: Prepare git identity
-      tags: ['git']
+      tags: ['git', 'git_all']
       shell: "cd /tmp/git-repository; git config --local user.name 'Ansible @ Riotkit Role'; git config --local user.email 'example@example.org'"
 
     - name: Create directories
-      tags: ['git']
+      tags: ['git', 'git_all']
       file:
           dest: "/tmp/git-repository/{{ item }}"
           state: directory
@@ -44,24 +44,24 @@
           - definitions/applications
 
     - name: Encode ArgoCD basic auth password
-      tags: ['git']
+      tags: ['git', 'git_all']
       shell: "openssl passwd -apr1 '{{ argocd_basic_auth.password }}'"
       register: argocd_basic_auth_password_encoded_apr1
 
     - include: repository.infracheck.yaml
-      tags: ['git_infracheck']
+      tags: ['git_infracheck', 'git_all']
       when: infracheck_enabled
 
     - include: repository.smtp.yaml
-      tags: ['git_smtp']
+      tags: ['git_smtp', 'git_all']
       when: mail_enabled
 
     - include: repository.telegraf.yaml
-      tags: ['git_telegraf']
+      tags: ['git_telegraf', 'git_all']
       when: telegraf_enabled
 
     - name: Create ArgoCD files from templates
-      tags: ['git_argocd']
+      tags: ['git_argocd', 'git_all']
       template:
           src: "repository/{{ item }}"
           dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
@@ -70,7 +70,7 @@
           - definitions/infrastructure/argocd-ingress.yaml.j2
 
     - name: Create files from templates
-      tags: ['git_traefik']
+      tags: ['git_traefik', 'git_all']
       template:
           src: "repository/{{ item }}"
           dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
@@ -79,23 +79,23 @@
           - README.md
 
     - name: Commit changes
-      tags: ['git']
-      shell: "cd /tmp/git-repository && git add . && git commit -m 'k3s-riotkit update' || true"
+      tags: ['git', 'git_all']
+      shell: "cd /tmp/git-repository && git add . && git status && git commit -m 'k3s-riotkit update' || true"
 
     - name: Push changes
-      tags: ['git']
+      tags: ['git', 'git_all']
       shell: "cd /tmp/git-repository && git push --force"
       environment:
           GIT_SSH_COMMAND: 'ssh -i /tmp/.rkt-git.rsa'
   always:
       - name: Delete repository key
-        tags: ['git']
+        tags: ['git', 'git_all']
         file:
             path: "/tmp/.rkt-git.rsa"
             state: absent
 
       - name: Delete repository directory
-        tags: ['git']
+        tags: ['git', 'git_all']
         file:
             path: /tmp/git-repository
             state: absent
