@@ -5,6 +5,12 @@ metadata:
     name: telegraf
     namespace: argocd
 spec:
+    # https://github.com/argoproj/argo-cd/issues/2382
+    ignoreDifferences:
+        - kind: ClusterRole
+          jsonPointers:
+              - /rules
+
     project: infrastructure
     source:
         repoURL: 'https://github.com/riotkit-org/influxdata-helm-charts'
