@@ -43,11 +43,6 @@
           - definitions/infrastructure
           - definitions/applications
 
-    - name: Encode ArgoCD basic auth password
-      tags: ['git', 'git_all']
-      shell: "openssl passwd -apr1 '{{ argocd_basic_auth.password }}'"
-      register: argocd_basic_auth_password_encoded_apr1
-
     - include: repository.infracheck.yaml
       tags: ['git_infracheck', 'git_all']
       when: infracheck_enabled

@@ -25,12 +25,12 @@
         shell: "kubectl create namespace {{ argocd_namespace }} || true"
 
       - name: Install ArgoCD Core
-        shell: "kubectl apply -f https://github.com/argoproj/argo-cd/blob/{{ argocd_version }}/manifests/core-install.yaml"
+        shell: "kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-cd/{{ argocd_version }}/manifests/core-install.yaml -n argocd"
 
       # wait for ArgoCD to be ready
       - name: "Wait for ArgoCD to be up and ready"
         tags: ['sync']
-        command: "kubectl wait --for=condition=ready pod -l argocd -n argocd --timeout=1s"
+        command: "kubectl wait --for=condition=ready pod --all -n argocd --timeout=1s"
         register: result
         until: result.rc == 0
         retries: 900
@@ -48,6 +48,16 @@
             content: "{{ cluster_git_repository.argocd_read_only_access_key }}"
             dest: "/tmp/.rkt-ro-git.rsa"
             mode: "0600"
+
+      - name: "Add GIT credentials"
+        tags: ['sync']
+        shell: |
+            argocd repocreds add {{ cluster_git_repository.remote }} --ssh-private-key-path /tmp/.rkt-ro-git.rsa --upsert
+
+      - name: "Add GIT-SSH to known hosts"
+        tags: ['sync']
+        shell: |
+            cat /etc/ssh/ssh_known_hosts | argocd cert add-ssh --batch 
 
       - name: Render root.yaml
         template:
