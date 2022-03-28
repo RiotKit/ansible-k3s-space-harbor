@@ -1,6 +1,6 @@
 
 - name: "Install Telegraf Certificates"
-  shell: "argocd --plaintext app sync telegraf-certs --prune"
+  shell: "argocd --core --plaintext app sync telegraf-certs --prune"
   retries: 25
   delay: 5
   register: telegraf_certs_sync
@@ -11,7 +11,7 @@
 
 
 - name: "Install Telegraf"
-  shell: "argocd --plaintext app sync telegraf --prune"
+  shell: "argocd --core --plaintext app sync telegraf --prune"
   retries: 25
   delay: 5
   register: telegraf_sync

@@ -5,7 +5,7 @@
   block:
       - name: Install argocd CLI
         get_url:
-            url: "https://github.com/argoproj/argo-cd/releases/download/{{ argocd_cli_version }}/argocd-linux-amd64"
+            url: "https://github.com/argoproj/argo-cd/releases/download/{{ argocd_version }}/argocd-linux-amd64"
             dest: /usr/local/bin/argocd
             mode: "u+rwx,g+rx,o+rx"
 
@@ -24,64 +24,24 @@
       - name: Create namespace
         shell: "kubectl create namespace {{ argocd_namespace }} || true"
 
-      - name: Create ArgoCD helm values
-        template:
-            src: "tmp/argocd-initial-values.yaml.j2"
-            dest: "/tmp/argocd-initial-values.yaml"
-
-      - name: Install ArgoCD using Helm
-        shell: |
-            helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm \
-                --create-namespace \
-                --values /tmp/argocd-initial-values.yaml \
-                --namespace {{ argocd_namespace }} \
-                --version={{ argocd_chart_version }} \
-                --wait
-
-      - name: Create a kubectl proxy background service to expose ArgoCD API for deployment time
-        tags: ['sync']
-        template:
-            src: "etc/systemd/system/argocd-api-proxy.service"
-            dest: "/etc/systemd/system/argocd-api-proxy.service"
-            owner: root
-            group: root
-            mode: 0640
-
-      - name: "Forward ArgoCD to localhost:8080"
-        tags: ['sync']
-        systemd:
-            state: restarted
-            name: "argocd-api-proxy"
-            daemon_reload: yes
-            enabled: no
+      - name: Install ArgoCD Core
+        shell: "kubectl apply -f https://github.com/argoproj/argo-cd/blob/{{ argocd_version }}/manifests/core-install.yaml"
 
       # wait for ArgoCD to be ready
       - name: "Wait for ArgoCD to be up and ready"
         tags: ['sync']
-        command: "curl http://localhost:8080 -k -s --head"
+        command: "kubectl wait --for=condition=ready pod -l argocd -n argocd --timeout=1s"
         register: result
-        until: result.stdout.find("200 OK") != -1
+        until: result.rc == 0
         retries: 900
         delay: 1
         changed_when: false
 
-      - name: "Get initial secret password"
-        tags: ['sync']
-        shell: 'kubectl -n {{ argocd_namespace }} get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d'
-        register: "initial_admin_secret"
-
       - name: "Login to ArgoCD"
         tags: ['sync']
         shell: |
-            argocd --plaintext login localhost:8080 --username=admin --password='{{ argocd_admin_password }}' --insecure \
-              || argocd --plaintext login localhost:8080 --username=admin --password='{{ argocd_old_password }}' --insecure \
-              || argocd --plaintext login localhost:8080 --username=admin --password='{{ initial_admin_secret.stdout | trim }}' --insecure
-
-      - name: "Change password"
-        shell: |
-            argocd account update-password --current-password='{{ argocd_admin_password }}' --new-password='{{ argocd_admin_password }}' \
-              || argocd account update-password --current-password='{{ argocd_old_password }}' --new-password='{{ argocd_admin_password }}' \
-              || argocd account update-password --current-password='{{ initial_admin_secret.stdout | trim }}' --new-password='{{ argocd_admin_password }}'
+            kubectl config set-context --current --namespace=argocd;
+            argocd login --core
 
       - name: "Copy read-only GIT key"
         copy:
@@ -103,7 +63,7 @@
 
       - name: "Install 'root' - a repository with declarations'"
         tags: ['sync']
-        shell: "argocd --plaintext app sync root"
+        shell: "argocd --core --plaintext app sync root"
         retries: 25
         delay: 3
         register: root_sync
@@ -111,15 +71,7 @@
 
       - name: "Install Traefik"
         tags: ['sync']
-        shell: "argocd --plaintext app sync traefik --prune"
-        retries: 25
-        delay: 8
-        register: traefik_sync
-        until: traefik_sync.rc == 0
-
-      - name: "Install ArgoCD ingress route"
-        tags: ['sync']
-        shell: "argocd --plaintext app sync argocd-ingress --prune"
+        shell: "argocd --core --plaintext app sync traefik --prune"
         retries: 25
         delay: 8
         register: traefik_sync
@@ -134,13 +86,6 @@
         when: telegraf_enabled
 
   always:
-      - name: "Turn off ArgoCD port forwarding"
-        tags: ['sync']
-        systemd:
-            state: stopped
-            name: "argocd-api-proxy"
-            enabled: no
-
       - name: "Delete temporary files containing sensitive information"
         file:
             path: "{{ item }}"

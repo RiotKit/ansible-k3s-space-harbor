@@ -60,15 +60,6 @@
       tags: ['git_telegraf', 'git_all']
       when: telegraf_enabled
 
-    - name: Create ArgoCD files from templates
-      tags: ['git_argocd', 'git_all']
-      template:
-          src: "repository/{{ item }}"
-          dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
-      with_items:
-          - src/argocd/ingress.yaml.j2
-          - definitions/infrastructure/argocd-ingress.yaml.j2
-
     - name: Create files from templates
       tags: ['git_traefik', 'git_all']
       template:

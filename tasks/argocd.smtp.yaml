@@ -1,5 +1,5 @@
 - name: "Install SMTP"
-  shell: "argocd --plaintext app sync smtp --prune"
+  shell: "argocd --core --plaintext app sync smtp --prune"
   retries: 25
   delay: 3
   register: smtp_sync
