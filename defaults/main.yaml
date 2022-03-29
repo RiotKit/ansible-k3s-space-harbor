@@ -13,6 +13,7 @@ timezone: "Europe/Warsaw"
 force_k3s_upgrade: false     # set this from CLI "-e force_k3s_upgrade=true" to upgrade the cluster with Ansible
 vpn_enabled: true            # communicate between cluster nodes over VPN, K3S will use {{ flannel_iface }} as main interface when vpn_enabled=true
 flannel_iface: wg0           # set this per node if you have multiple VPN interfaces
+canal_enabled: true
 
 # configure, if you have multiple clusters and access them by same network/VPN
 net_cluster_cidr: "10.42.0.0/16"
@@ -45,96 +46,6 @@ cluster_git_repository:
 argocd_git_port: "22"            # same port as in cluster_git_repository.remote option
 argocd_git_host: "github.com"    # same host as in cluster_git_repository.remote option
 argocd_namespace: "argocd"       # better to not change
-
-argocd_helm_settings: {}
-argocd_defaults:
-    controller:
-        args:
-            # adjust those values to higher ones if your cluster has more applications
-            statusProcessors: "5"
-            operationProcessors: "4"
-            appResyncPeriod: "3600"
-            selfHealTimeout: "45"
-            repoServerTimeoutSeconds: "600"
-        affinity:
-            nodeAffinity:
-                requiredDuringSchedulingIgnoredDuringExecution:
-                    nodeSelectorTerms:
-                        - matchExpressions:
-                            - key: node-role.kubernetes.io/control-plane
-                              operator: In
-                              values:
-                                  - "true"
-    dex:
-        enabled: false
-
-    redis:
-        affinity:
-            nodeAffinity:
-                requiredDuringSchedulingIgnoredDuringExecution:
-                    nodeSelectorTerms:
-                        - matchExpressions:
-                            - key: node-role.kubernetes.io/control-plane
-                              operator: In
-                              values:
-                                  - "true"
-    server:
-        extraArgs: ['--insecure']
-        config:
-            application.instanceLabelKey: argocd.argoproj.io/instance
-            ui.bannercontent: Brought to you by Open Source work of anarchist tech-collective - Riotkit
-            ui.bannerUrl: https://github.com/riotkit
-            url: "https://{{ argocd_subdomain }}.{{ main_domain }}"
-        affinity:
-            nodeAffinity:
-                requiredDuringSchedulingIgnoredDuringExecution:
-                    nodeSelectorTerms:
-                        - matchExpressions:
-                            - key: node-role.kubernetes.io/control-plane
-                              operator: In
-                              values:
-                                  - "true"
-
-
-    # ingress is disabled by default because we have a separate definition created especially for Traefik with
-    # additional wall of Basic Auth
-    ingress:
-        enabled: false
-    ingressGrpc:
-        enabled: false
-
-    configs:
-        knownHosts:
-            data:
-                #
-                # ArgoCD requires to have a collection of public SSH keys of remote git repositories it is going to pull
-                #
-                ssh_known_hosts: |
-                    bitbucket.org ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAubiN81eDcafrgMeLzaFPsw2kNvEcqTKl/VqLat/MaB33pZy0y3rJZtnqwR2qOOvbwKZYKiEO1O6VqNEBxKvJJelCq0dTXWT5pbO2gDXC6h6QDXCaHo6pOHGPUy+YBaGQRGuSusMEASYiWunYN0vCAI8QaXnWMXNMdFP3jHAJH0eDsoiGnLPBlBp4TNm6rYI74nMzgz3B9IikW4WVK+dc8KZJZWYjAuORU3jc1c/NPskD2ASinf8v3xnfXeukU0sJ5N6m5E8VLjObPEO+mN2t/FZTMZLiFqPWc/ALSqnMnnhwrNi2rbfg/rd/IpL8Le3pSBne8+seeFVBoGqzHM9yXw==
-                    github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
-                    gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
-                    gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
-                    gitlab.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsj2bNKTBSpIYDEGk9KxsGh3mySTRgMtXL583qmBpzeQ+jqCMRgBqB98u3z++J1sKlXHWfM9dyhSevkMwSbhoR8XIq/U0tCNyokEi/ueaBMCvbcTHhO7FcwzY92WK4Yt0aGROY5qX2UKSeOvuP4D6TPqKF1onrSzH9bx9XUf2lEdWT/ia1NEKjunUqu1xOB/StKDHMoX4/OKyIzuS0q/T1zOATthvasJFoPrAjkohTyaDUz2LN5JoH839hViyEG82yB+MjcFV5MU3N1l1QL3cVUCh93xSaua1N85qivl+siMkPGbO5xR/En4iEY6K2XPASUEMaieWVNTRCtJ4S8H+9
-                    ssh.dev.azure.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H
-                    vs-ssh.visualstudio.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7Hr1oTWqNqOlzGJOfGJ4NakVyIzf1rXYd4d7wo6jBlkLvCA4odBlL0mDUyZ0/QUfTTqeu+tm22gOsv+VrVTMk6vwRU75gY/y9ut5Mb3bR5BV58dKXyq9A9UeB5Cakehn5Zgm6x1mKoVyf+FFn26iYqXJRgzIZZcZ5V6hrE0Qg39kZm4az48o0AUbf6Sp4SLdvnuMa2sVNwHBboS7EJkm57XQPVU3/QpyNLHbWDdzwtrlS+ez30S3AdYhLKEOxAG8weOnyrtLJAUen9mTkol8oII1edf7mWWbWVf0nBmly21+nZcmCTISQBtdcyPaEno7fFQMDD26/s0lfKob4Kw8H
-                    {{ ssh_known_host_results.stdout }}
-
-        credentialTemplates:
-            #
-            # Read-only access to GIT repository is required using a private key
-            # Hint: Create a service account in Github, Gitea, Gitlab, etc.
-            #
-            ssh-creds:
-                url: "{{ cluster_git_repository.remote }}"
-                sshPrivateKey: "{{ cluster_git_repository.argocd_read_only_access_key }}"
-
-        #
-        # List of enabled GIT repositories to be watched by ArgoCD
-        #
-        repositories:
-            riotkit-cluster-root:
-                url: "{{ cluster_git_repository.remote }}"
-
 
 # ============================
 #  Tools installed on machine

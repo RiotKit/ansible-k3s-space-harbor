@@ -13,6 +13,10 @@
   tags: sealed_secrets
   when: node_type == "primary"
 
+- include: network-policies.yaml
+  tags: network_policies
+  when: node_type == "primary" and canal_enabled
+
 - include: repository.yaml
   tags: repository
   when: node_type == "primary"
