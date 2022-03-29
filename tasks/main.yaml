@@ -11,7 +11,7 @@
 
 - include: sealed_secrets.yaml
   tags: sealed_secrets
-  when: node_type == "primary"
+  when: node_type == "primary" and secrets_enabled
 
 - include: network-policies.yaml
   tags: network_policies
@@ -23,4 +23,4 @@
 
 - include: argocd.yaml
   tags: argocd
-  when: node_type == "primary" and secrets_enabled
+  when: node_type == "primary"
