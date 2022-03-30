@@ -8,6 +8,12 @@ secrets_version: "2.1.4"          # https://artifacthub.io/packages/helm/bitnami
 telegraf_chart_version: "1.8.17"  # https://artifacthub.io/packages/helm/influxdata/telegraf
 traefik_chart_version: "10.19.0"  # https://artifacthub.io/packages/helm/traefik/traefik
 
+# ============================
+#  Tools installed on machine
+# ============================
+tool_helm_version: "v3.8.1"       # https://github.com/helm/helm/releases
+tool_kubeseal_version: "v0.17.3"  # https://github.com/bitnami-labs/sealed-secrets/releases (notice: only versions with released asset "kubeseal-linux-amd64")
+
 main_domain: "example.org"   # main public DNS domain of your cluster. All services will be exposed as subdomains under this domain
 timezone: "Europe/Warsaw"
 force_k3s_upgrade: false     # set this from CLI "-e force_k3s_upgrade=true" to upgrade the cluster with Ansible
@@ -46,12 +52,6 @@ cluster_git_repository:
 argocd_git_port: "22"            # same port as in cluster_git_repository.remote option
 argocd_git_host: "github.com"    # same host as in cluster_git_repository.remote option
 argocd_namespace: "argocd"       # better to not change
-
-# ============================
-#  Tools installed on machine
-# ============================
-tool_helm_version: "v3.7.1"       # https://github.com/helm/helm/releases
-tool_kubeseal_version: "v0.16.0"  # https://github.com/bitnami-labs/sealed-secrets/releases (notice: only versions with released asset "kubeseal-linux-amd64")
 
 
 # =====================
