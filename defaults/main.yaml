@@ -20,6 +20,7 @@ force_k3s_upgrade: false     # set this from CLI "-e force_k3s_upgrade=true" to 
 vpn_enabled: true            # communicate between cluster nodes over VPN, K3S will use {{ flannel_iface }} as main interface when vpn_enabled=true
 flannel_iface: wg0           # set this per node if you have multiple VPN interfaces
 canal_enabled: true
+firewall_enabled: true       # install and configure UFW firewall
 
 # configure, if you have multiple clusters and access them by same network/VPN
 net_cluster_cidr: "10.42.0.0/16"
@@ -37,6 +38,8 @@ administrative_services_restrict_access: # restrict access by subnet/ip to ArgoC
 node_labels: []
     # - arch=arm
 node_taints: ""
+primary_api_allowed_ips:
+    - "{{ vpn_cidr }}"
 
 # =====================
 #  GIT repository for a Cluster is a SINGLE SOURCE OF TRUTH
