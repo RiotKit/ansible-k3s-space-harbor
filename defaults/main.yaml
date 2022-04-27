@@ -34,7 +34,8 @@ administrative_services_restrict_access: # restrict access by subnet/ip to ArgoC
     - "{{ net_cluster_cidr }}"
     - "{{ vpn_cidr }}"
     - "{{ net_services_cidr }}"
-node_labels: ""
+node_labels: []
+    # - arch=arm
 node_taints: ""
 
 # =====================

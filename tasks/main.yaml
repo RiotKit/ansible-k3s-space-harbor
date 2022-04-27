@@ -7,7 +7,7 @@
 
 - include: cluster.compute.yaml
   tags: ['cluster', 'k3s']
-  when: node_type == "compute"
+  when: node_type != "primary"
 
 - include: sealed_secrets.yaml
   tags: sealed_secrets
