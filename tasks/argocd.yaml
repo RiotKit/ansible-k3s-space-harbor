@@ -24,8 +24,11 @@
       - name: Create namespace
         shell: "kubectl create namespace {{ argocd_namespace }} || true"
 
+      - name: Include git-clone task
+        include_tasks: includes/git-clone.yaml
+
       - name: Install ArgoCD Core
-        shell: "kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-cd/{{ argocd_version }}/manifests/core-install.yaml -n argocd"
+        shell: "cd /tmp/git-repository && kustomize build | kubectl apply -f - -n argocd"
 
       # wait for ArgoCD to be ready
       - name: "Wait for ArgoCD to be up and ready"
@@ -79,22 +82,6 @@
         register: root_sync
         until: root_sync.rc == 0
 
-      - name: "Install Traefik"
-        tags: ['sync']
-        shell: "argocd --core --plaintext app sync traefik --prune"
-        retries: 25
-        delay: 8
-        register: traefik_sync
-        until: traefik_sync.rc == 0
-
-      - include: argocd.smtp.yaml
-        tags: ['sync']
-        when: mail_enabled
-
-      - include: argocd.telegraf.yaml
-        tags: ['sync']
-        when: telegraf_enabled
-
   always:
       - name: "Delete temporary files containing sensitive information"
         file:
@@ -103,3 +90,5 @@
         with_items:
             - "/tmp/.rkt-ro-git.rsa"
             - "/tmp/argocd-initial-values.yaml"
+
+      - include_tasks: includes/finally.git-clone.yaml

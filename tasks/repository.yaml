@@ -1,17 +1,9 @@
-- name: Create temporary directory for git repository preparation
-  tags: ['git', 'git_all']
-  file:
-      path: /tmp/git-repository
-      state: directory
 
-- name: Write GIT configuration key
-  tags: ['git', 'git_all']
-  copy:
-      content: "{{ cluster_git_repository.deployment_time_access_key }}"
-      dest: "/tmp/.rkt-git.rsa"
-      mode: "0600"
 
 - block:
+    - include_tasks: includes/git-clone.yaml
+      tags: ['git', 'git_all']
+
     - name: Clone
       tags: ['git', 'git_all']
       git:
@@ -74,11 +66,8 @@
       environment:
           GIT_SSH_COMMAND: 'ssh -i /tmp/.rkt-git.rsa'
   always:
-      - name: Delete repository key
+      - include_tasks: includes/finally.git-clone.yaml
         tags: ['git', 'git_all']
-        file:
-            path: "/tmp/.rkt-git.rsa"
-            state: absent
 
       - name: Delete repository directory
         tags: ['git', 'git_all']

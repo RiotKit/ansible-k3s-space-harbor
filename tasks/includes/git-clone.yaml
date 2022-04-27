@@ -1,0 +1,23 @@
+- name: Create temporary directory for git repository preparation
+  file:
+      path: /tmp/git-repository
+      state: directory
+
+- name: Clone
+  git:
+      key_file: "/tmp/.rkt-git.rsa"
+      repo: "{{ cluster_git_repository.remote }}"
+      version: "{{ cluster_git_repository.branch }}"
+      dest: /tmp/git-repository
+      clone: yes
+      update: yes
+      accept_hostkey: yes
+      force: yes
+  environment:
+      GIT_ASKPASS: "/usr/bin/true"
+
+- name: Write GIT configuration key
+  copy:
+      content: "{{ cluster_git_repository.deployment_time_access_key }}"
+      dest: "/tmp/.rkt-git.rsa"
+      mode: "0600"

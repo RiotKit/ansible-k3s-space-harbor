@@ -30,6 +30,7 @@
             --cluster-cidr={{ net_cluster_cidr }} \
             --service-cidr={{ net_services_cidr }} \
             --node-name="{{ node_type }}" \
+            --node-label="node-type={{ node_type }}" \
             --with-node-id \
             --resolv-conf=/etc/riotkit/resolv.conf \
             {%- if cluster_api_bind_address %}
