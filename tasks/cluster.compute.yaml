@@ -43,12 +43,13 @@
       curl -sfL https://get.k3s.io | bash -s - \
           --node-name="{{ node_type }}" \
           --with-node-id \
-          {%- if node_labels %}
-          --node-label="{{ node_labels }}" \
-          {%- endif %}
-          {%- if node_taints %}
-          --node-taint="{{ node_taints }}" \
-          {%- endif %}
+          --node-label="node-type={{ node_type }}" \
+          {%- for label in node_labels %}
+          --node-label="{{ label }}" \
+          {%- endfor %}
+          {%- for taint in node_taints %}
+          --node-taint="{{ taint }}" \
+          {%- endfor %}
           --resolv-conf="/etc/riotkit/resolv.conf" \
           --token-file="/etc/riotkit/primary-token" \
           {%- if vpn_enabled %}

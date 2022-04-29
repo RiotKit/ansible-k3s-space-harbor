@@ -30,6 +30,13 @@
             --cluster-cidr={{ net_cluster_cidr }} \
             --service-cidr={{ net_services_cidr }} \
             --node-name="{{ node_type }}" \
+            --node-label="node-type={{ node_type }}" \
+            {%- for label in node_labels %}
+            --node-label="{{ label }}" \
+            {%- endfor %}
+            {%- for taint in node_taints %}
+            --node-taint="{{ taint }}" \
+            {%- endfor %}
             --with-node-id \
             --resolv-conf=/etc/riotkit/resolv.conf \
             {%- if cluster_api_bind_address %}

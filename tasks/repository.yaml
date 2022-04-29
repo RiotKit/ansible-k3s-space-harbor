@@ -1,17 +1,9 @@
-- name: Create temporary directory for git repository preparation
-  tags: ['git', 'git_all']
-  file:
-      path: /tmp/git-repository
-      state: directory
 
-- name: Write GIT configuration key
-  tags: ['git', 'git_all']
-  copy:
-      content: "{{ cluster_git_repository.deployment_time_access_key }}"
-      dest: "/tmp/.rkt-git.rsa"
-      mode: "0600"
 
 - block:
+    - include_tasks: includes/git-clone.yaml
+      tags: ['git', 'git_all']
+
     - name: Clone
       tags: ['git', 'git_all']
       git:
@@ -43,11 +35,6 @@
           - definitions/infrastructure
           - definitions/applications
 
-    - name: Encode ArgoCD basic auth password
-      tags: ['git', 'git_all']
-      shell: "openssl passwd -apr1 '{{ argocd_basic_auth.password }}'"
-      register: argocd_basic_auth_password_encoded_apr1
-
     - include: repository.infracheck.yaml
       tags: ['git_infracheck', 'git_all']
       when: infracheck_enabled
@@ -59,15 +46,6 @@
     - include: repository.telegraf.yaml
       tags: ['git_telegraf', 'git_all']
       when: telegraf_enabled
-
-    - name: Create ArgoCD files from templates
-      tags: ['git_argocd', 'git_all']
-      template:
-          src: "repository/{{ item }}"
-          dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
-      with_items:
-          - src/argocd/ingress.yaml.j2
-          - definitions/infrastructure/argocd-ingress.yaml.j2
 
     - name: Create files from templates
       tags: ['git_traefik', 'git_all']
@@ -88,11 +66,8 @@
       environment:
           GIT_SSH_COMMAND: 'ssh -i /tmp/.rkt-git.rsa'
   always:
-      - name: Delete repository key
+      - include_tasks: includes/finally.git-clone.yaml
         tags: ['git', 'git_all']
-        file:
-            path: "/tmp/.rkt-git.rsa"
-            state: absent
 
       - name: Delete repository directory
         tags: ['git', 'git_all']

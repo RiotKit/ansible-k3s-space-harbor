@@ -1,3 +1,9 @@
+# Documentation:
+#   https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#projects
+#
+# Hint: Organize applications into AppProjects to separate their privileges and access to those applications
+#
+
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
@@ -9,6 +15,14 @@ spec:
     clusterResourceWhitelist:
         - group: '*'
           kind: '*'
+    namespaceResourceBlacklist:
+        - group: ''
+          kind: ResourceQuota
+        - group: ''
+          kind: LimitRange
+        - group: ''
+          kind: NetworkPolicy
+    # namespaceResourceWhitelist: []
     destinations:
         - namespace: '*'
           server: '*'

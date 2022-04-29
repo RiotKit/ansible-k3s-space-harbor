@@ -1,0 +1,10 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: argocd-applicationset-controller
+spec:
+    template:
+        spec:
+            nodeSelector:
+                node-type: primary

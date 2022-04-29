@@ -1,0 +1,19 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+    name: argocd-application-controller
+spec:
+    template:
+        spec:
+            nodeSelector:
+                node-type: primary
+            containers:
+                - name: argocd-application-controller
+                  livenessProbe:
+                      initialDelaySeconds: 5
+                      failureThreshold: 2
+                      periodSeconds: 70
+                  readinessProbe:
+                      failureThreshold: 2
+                      periodSeconds: 45

@@ -1,0 +1,13 @@
+- name: Allow everything and enable UFW
+  community.general.ufw:
+      state: enabled
+      policy: allow
+      logging: 'on'
+
+- name: Block access for unwanted hosts to the API server
+  community.general.ufw:
+      rule: allow
+      proto: tcp
+      port: 6443
+      src: '{{ item }}'
+  loop: "{{ primary_api_allowed_ips }}"
