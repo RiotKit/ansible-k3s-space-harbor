@@ -1,0 +1,14 @@
+galaxy_info:
+    author: Riotkit
+    description: Space Harbor, an opinionated K3s installation
+    company: Riotkit Tech Collective
+    license: MIT
+    min_ansible_version: 1.2
+
+    galaxy_tags:
+        - kubernetes
+        - k3s
+        - riotkit
+        - k8s
+
+dependencies: []
