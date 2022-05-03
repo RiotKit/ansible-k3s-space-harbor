@@ -45,6 +45,7 @@
             {%- endif %}
             {%- if vpn_enabled %}
             --flannel-iface={{ flannel_iface }} \
+            --flannel-backend=wireguard \
             {%- endif %}
             --data-dir={{ cluster_data_path }} \
   when: not k3s_installed.stat.exists or force_k3s_upgrade
