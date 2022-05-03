@@ -3,6 +3,7 @@
 #
 # Hint: Organize applications into AppProjects to separate their privileges and access to those applications
 #
+# todo: Move this to GIT repository to make more control over those resources for end administrator
 
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -12,9 +13,7 @@ metadata:
   namespace: argocd
 spec:
     description: 'Applications from "definitions/applications" ({{ cluster_git_repository.remote }})'
-    clusterResourceWhitelist:
-        - group: '*'
-          kind: '*'
+    clusterResourceWhitelist: []
     namespaceResourceBlacklist:
         - group: ''
           kind: ResourceQuota
@@ -79,8 +78,6 @@ kind: Application
 metadata:
     name: root
     namespace: {{ argocd_namespace }}
-    finalizers:
-        - resources-finalizer.argocd.argoproj.io
 spec:
     project: default
     source:
