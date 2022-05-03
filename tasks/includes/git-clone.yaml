@@ -3,6 +3,12 @@
       path: /tmp/git-repository
       state: directory
 
+- name: Write GIT configuration key
+  copy:
+      content: "{{ cluster_git_repository.deployment_time_access_key }}"
+      dest: "/tmp/.rkt-git.rsa"
+      mode: "0600"
+
 - name: Clone
   git:
       key_file: "/tmp/.rkt-git.rsa"
@@ -15,9 +21,3 @@
       force: yes
   environment:
       GIT_ASKPASS: "/usr/bin/true"
-
-- name: Write GIT configuration key
-  copy:
-      content: "{{ cluster_git_repository.deployment_time_access_key }}"
-      dest: "/tmp/.rkt-git.rsa"
-      mode: "0600"

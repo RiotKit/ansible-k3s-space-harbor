@@ -1,5 +1,5 @@
 - name: Check if SMTP gateway was already configred
-  stat: path=/tmp/git-repository/definitions/infrastructure/smtp.yaml.j2
+  stat: path=/tmp/git-repository/definitions/infrastructure/smtp.yaml
   register: smtp_configured
 
 - when: '"git_smtp" in ansible_run_tags or not smtp_configured.stat.exists'

@@ -1,0 +1,13 @@
+- name: Check if Traefik was already configred
+  stat: path=/tmp/git-repository/README.md
+  register: readme_created
+
+- when: 'not readme_created.stat.exists'
+  block:
+      - name: Copy README.md
+        tags: ['git_all']
+        template:
+            src: "repository/{{ item }}"
+            dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
+        with_items:
+            - README.md

@@ -4,20 +4,6 @@
     - include_tasks: includes/git-clone.yaml
       tags: ['git', 'git_all']
 
-    - name: Clone
-      tags: ['git', 'git_all']
-      git:
-          key_file: "/tmp/.rkt-git.rsa"
-          repo: "{{ cluster_git_repository.remote }}"
-          version: "{{ cluster_git_repository.branch }}"
-          dest: /tmp/git-repository
-          clone: yes
-          update: yes
-          accept_hostkey: yes
-          force: yes
-      environment:
-          GIT_ASKPASS: "/usr/bin/true"
-
     - name: Prepare git identity
       tags: ['git', 'git_all']
       shell: "cd /tmp/git-repository; git config --local user.name 'Ansible @ Riotkit Role'; git config --local user.email 'example@example.org'"
@@ -35,6 +21,9 @@
           - definitions/infrastructure
           - definitions/applications
 
+    - include: repository.argocd.yaml
+      tags: ['git_argocd', 'git_all']
+
     - include: repository.infracheck.yaml
       tags: ['git_infracheck', 'git_all']
       when: infracheck_enabled
@@ -47,14 +36,12 @@
       tags: ['git_telegraf', 'git_all']
       when: telegraf_enabled
 
-    - name: Create files from templates
+    - include: repository.traefik.yaml
       tags: ['git_traefik', 'git_all']
-      template:
-          src: "repository/{{ item }}"
-          dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
-      with_items:
-          - definitions/infrastructure/traefik.yaml.j2
-          - README.md
+      when: telegraf_enabled
+
+    - include: repository.readme.yaml
+      tags: ['git_all']
 
     - name: Commit changes
       tags: ['git', 'git_all']

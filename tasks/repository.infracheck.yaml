@@ -1,5 +1,5 @@
 - name: Check if Infracheck was already configred
-  stat: path=/tmp/git-repository/definitions/infrastructure/infracheck.yaml.j2
+  stat: path=/tmp/git-repository/definitions/infrastructure/infracheck.yaml
   register: infracheck_configured
 
 - when: '"git_infracheck" in ansible_run_tags or not infracheck_configured.stat.exists'

@@ -1,0 +1,13 @@
+- name: Check if Traefik was already configred
+  stat: path=/tmp/git-repository/definitions/infrastructure/traefik.yaml
+  register: traefik_configured
+
+- when: '"git_traefik" in ansible_run_tags or not traefik_configured.stat.exists'
+  block:
+      - name: Copy traefik files
+        tags: ['git_traefik', 'git_all']
+        template:
+            src: "repository/{{ item }}"
+            dest: /tmp/git-repository/{{ item | regex_replace('\.j2$', '') }}
+        with_items:
+            - definitions/infrastructure/traefik.yaml.j2

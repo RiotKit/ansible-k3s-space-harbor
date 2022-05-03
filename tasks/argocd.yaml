@@ -28,7 +28,7 @@
         include_tasks: includes/git-clone.yaml
 
       - name: Install ArgoCD Core
-        shell: "cd /tmp/git-repository && kustomize build | kubectl apply -f - -n argocd"
+        shell: "cd /tmp/git-repository/bootstrap/argocd && kustomize build | kubectl apply -f - -n argocd"
 
       # wait for ArgoCD to be ready
       - name: "Wait for ArgoCD to be up and ready"

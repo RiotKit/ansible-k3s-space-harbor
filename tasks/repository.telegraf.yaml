@@ -1,5 +1,5 @@
 - name: Check if Telegraf was already configred
-  stat: path=/tmp/git-repository/definitions/infrastructure/telegraf.yaml.j2
+  stat: path=/tmp/git-repository/definitions/infrastructure/telegraf.yaml
   register: telegraf_configured
 
 - when: '"git_telegraf" in ansible_run_tags or not telegraf_configured.stat.exists'
@@ -25,7 +25,7 @@
             - definitions/infrastructure/telegraf-certs.yaml.j2
             - definitions/infrastructure/telegraf.yaml.j2
         vars:
-            create_secret: "{{ sealed_secrets_exists.rc == 0 }}"
+            create_secret: "{{ telegraf_configured.rc == 0 }}"
   always:
       - name: Delete Telegraf plain secret temporary file
         file:
