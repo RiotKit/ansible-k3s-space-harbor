@@ -24,6 +24,9 @@
     - include: repository.argocd.yaml
       tags: ['git_argocd', 'git_all']
 
+    - include: repository.projects.yaml
+      tags: ['git_projects', 'git_all']
+
     - include: repository.infracheck.yaml
       tags: ['git_infracheck', 'git_all']
       when: infracheck_enabled

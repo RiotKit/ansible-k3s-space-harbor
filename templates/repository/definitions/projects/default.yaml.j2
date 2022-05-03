@@ -1,0 +1,16 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+    name: default
+    namespace: argocd
+spec:
+    description: 'Should contain only "root" application that synchronizes other definitions from "definitions/*" directory in repository'
+    clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+    destinations:
+        - namespace: '*'
+          server: '*'
+    sourceRepos:
+        - '*'

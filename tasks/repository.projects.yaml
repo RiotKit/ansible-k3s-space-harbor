@@ -1,0 +1,10 @@
+- name: Create projects directory
+  file:
+      path: /tmp/git-repository/definitions/projects
+      state: directory
+
+- include_tasks: includes/repository.projects.yaml
+  with_items:
+      - definitions/projects/applications.yaml.j2
+      - definitions/projects/default.yaml.j2
+      - definitions/projects/infrastructure.yaml.j2
