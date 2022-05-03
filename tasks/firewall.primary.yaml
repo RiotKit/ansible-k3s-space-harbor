@@ -10,4 +10,4 @@
       proto: tcp
       port: 6443
       src: '{{ item }}'
-  loop: "{{ primary_api_allowed_ips }}"
+  with_items: "{{ groups['all'] | map('extract', hostvars, ['ansible_ssh_host']) }}"
