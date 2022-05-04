@@ -47,6 +47,7 @@
           {%- for label in node_labels %}
           --node-label="{{ label }}" \
           {%- endfor %}
+          --node-label="node-instance-title={{ node_instance_title | default(inventory_hostname) }} " \
           {%- for taint in node_taints %}
           --node-taint="{{ taint }}" \
           {%- endfor %}
