@@ -43,6 +43,10 @@
       curl -sfL https://get.k3s.io | bash -s - \
           --node-name="{{ node_type }}" \
           --with-node-id \
+          --node-external-ip={{ node_external_ip | default(ansible_ssh_host) }} \
+          {%- if node_internal_ip %}
+          --node-ip={{ node_internal_ip }} \
+          {%- endif %} \
           --node-label="node-type={{ node_type }}" \
           {%- for label in node_labels %}
           --node-label="{{ label }}" \
