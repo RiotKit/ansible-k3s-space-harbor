@@ -24,31 +24,31 @@
   become: yes
   become_user: root
   shell: |
-      export INSTALL_K3S_VERSION="{{ k3s_version }}";
+      export INSTALL_K3S_VERSION="{{ k3s_version | trim }}";
       curl -sfL https://get.k3s.io | bash -s - --no-deploy traefik \
             --disable-cloud-controller \
-            --cluster-cidr={{ net_cluster_cidr }} \
-            --service-cidr={{ net_services_cidr }} \
+            --cluster-cidr={{ net_cluster_cidr | trim }} \
+            --service-cidr={{ net_services_cidr | trim }} \
             --node-name="{{ node_type }}" \
-            --node-label="node-type={{ node_type }}" \
+            --node-label="node-type={{ node_type | trim }}" \
             {%- for label in node_labels %}
-            --node-label="{{ label }}" \
+            --node-label="{{ label | trim }}" \
             {%- endfor %}
-            --node-label="node-instance-title={{ node_instance_title | default(inventory_hostname) }} " \
+            --node-label="node-instance-title={{ node_instance_title | default(inventory_hostname) | trim }} " \
             {%- for taint in node_taints %}
-            --node-taint="{{ taint }}" \
+            --node-taint="{{ taint | trim }}" \
             {%- endfor %}
             --with-node-id \
             --resolv-conf=/etc/riotkit/resolv.conf \
             {%- if cluster_api_bind_address %}
             --bind-address={{ cluster_api_bind_address }} \
-            --node-ip={{ cluster_api_bind_address }}
+            --node-ip={{ cluster_api_bind_address | trim }}
             {%- endif %}
             {%- if vpn_enabled %}
-            --flannel-iface={{ flannel_iface }} \
+            --flannel-iface={{ flannel_iface | trim }} \
             --flannel-backend=wireguard \
             {%- endif %}
-            --data-dir={{ cluster_data_path }} \
+            --data-dir={{ cluster_data_path | trim }} \
   when: not k3s_installed.stat.exists or force_k3s_upgrade
 
 - name: Enable k3s at system startup

@@ -41,27 +41,27 @@
       {%- endif %}
       export K3S_TOKEN_FILE="/etc/riotkit/primary-token";
       curl -sfL https://get.k3s.io | bash -s - \
-          --node-name="{{ node_type }}" \
+          --node-name="{{ node_type | trim }}" \
           --with-node-id \
           --node-external-ip={{ node_external_ip | default(ansible_ssh_host) }} \
           {%- if node_internal_ip %}
-          --node-ip={{ node_internal_ip }} \
+          --node-ip={{ node_internal_ip | trim }} \
           {%- endif %} \
-          --node-label="node-type={{ node_type }}" \
+          --node-label="node-type={{ node_type | trim }}" \
           {%- for label in node_labels %}
-          --node-label="{{ label }}" \
+          --node-label="{{ label | trim }}" \
           {%- endfor %}
-          --node-label="node-instance-title={{ node_instance_title | default(inventory_hostname) }} " \
+          --node-label="node-instance-title={{ node_instance_title | default(inventory_hostname) | trim }} " \
           {%- for taint in node_taints %}
-          --node-taint="{{ taint }}" \
+          --node-taint="{{ taint | trim }}" \
           {%- endfor %}
           --resolv-conf="/etc/riotkit/resolv.conf" \
           --token-file="/etc/riotkit/primary-token" \
           {%- if vpn_enabled %}
           --flannel-iface={{ flannel_iface }} \
-          --server="https://{{ vpn_primary_node_ip }}:6443" \
+          --server="https://{{ vpn_primary_node_ip | trim }}:6443" \
           {%- else %}
-          --server="https://{{ primary_node_public_ip }}:6443" \
+          --server="https://{{ primary_node_public_ip | trim }}:6443" \
           {%- endif %}
   when: not k3s_installed.stat.exists or force_k3s_upgrade
 
