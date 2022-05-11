@@ -39,6 +39,10 @@
             --node-taint="{{ taint | trim }}" \
             {%- endfor %}
             --with-node-id \
+            --node-external-ip={{ node_external_ip | default(ansible_ssh_host) }} \
+            {%- if node_internal_ip %}
+            --node-ip={{ node_internal_ip | trim }} \
+            {%- endif %} \
             --resolv-conf=/etc/riotkit/resolv.conf \
             {%- if cluster_api_bind_address %}
             --bind-address={{ cluster_api_bind_address }} \
@@ -48,7 +52,7 @@
             --flannel-iface={{ flannel_iface | trim }} \
             --flannel-backend=wireguard \
             {%- endif %}
-            --data-dir={{ cluster_data_path | trim }} \
+            --data-dir={{ cluster_data_path | trim }}
   when: not k3s_installed.stat.exists or force_k3s_upgrade
 
 - name: Enable k3s at system startup
