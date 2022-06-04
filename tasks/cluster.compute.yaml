@@ -62,6 +62,10 @@
           {%- else %}
           --server="https://{{ primary_node_public_ip | trim }}:6443" \
           {%- endif %}
+          {%- for arg in kubelet_args %}
+          --kubelet-arg="{{ arg | trim }}" \
+          {%- endfor %}
+          --with-node-id
   when: not k3s_installed.stat.exists or force_k3s_upgrade
 
 - name: Enable k3s at system startup

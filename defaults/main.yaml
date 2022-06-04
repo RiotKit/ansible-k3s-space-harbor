@@ -40,6 +40,8 @@ node_labels: []
 node_taints: ""
 primary_api_allowed_ips:
     - "{{ vpn_cidr }}"
+kubelet_args: []
+# - "--eviction-hard=memory.available<350Mi,nodefs.available<20Gi"
 
 # =====================
 #  GIT repository for a Cluster is a SINGLE SOURCE OF TRUTH
