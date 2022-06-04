@@ -42,7 +42,6 @@
       export K3S_TOKEN_FILE="/etc/riotkit/primary-token";
       curl -sfL https://get.k3s.io | bash -s - \
           --node-name="{{ node_type | trim }}" \
-          --with-node-id \
           --node-external-ip={{ node_external_ip | default(ansible_ssh_host) }} \
           {%- if node_internal_ip %}
           --node-ip={{ node_internal_ip | trim }} \
@@ -51,7 +50,7 @@
           {%- for label in node_labels %}
           --node-label="{{ label | trim }}" \
           {%- endfor %}
-          --node-label="node-instance-title={{ node_instance_title | default(inventory_hostname) | trim }} " \
+          --node-label="node-instance-title={{ node_instance_title | default(inventory_hostname) | trim }}" \
           {%- for taint in node_taints %}
           --node-taint="{{ taint | trim }}" \
           {%- endfor %}
