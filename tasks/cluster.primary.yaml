@@ -34,7 +34,7 @@
             {%- for label in node_labels %}
             --node-label="{{ label | trim }}" \
             {%- endfor %}
-            --node-label="node-instance-title={{ node_instance_title | default(inventory_hostname) | trim }} " \
+            --node-label="node-instance-title={{ node_instance_title | default(inventory_hostname) | trim }}" \
             {%- for taint in node_taints %}
             --node-taint="{{ taint | trim }}" \
             {%- endfor %}
@@ -50,7 +50,7 @@
             {%- endif %}
             {%- if vpn_enabled %}
             --flannel-iface={{ flannel_iface | trim }} \
-            --flannel-backend=wireguard \
+            --flannel-backend=wireguard-native \
             {%- endif %}
             --data-dir={{ cluster_data_path | trim }}
   when: not k3s_installed.stat.exists or force_k3s_upgrade
