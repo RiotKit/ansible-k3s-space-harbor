@@ -43,6 +43,7 @@ primary_api_allowed_ips:
 kubelet_args: []
 # - "--eviction-hard=memory.available<350Mi,nodefs.available<20Gi"
 k3s_datastore_endpoint: sqlite
+vpn_flannel_backend: wireguard
 
 # =====================
 #  GIT repository for a Cluster is a SINGLE SOURCE OF TRUTH
