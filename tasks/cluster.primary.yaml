@@ -51,7 +51,8 @@
             --flannel-iface={{ flannel_iface | trim }} \
             --flannel-backend=wireguard-native \
             {%- endif %}
-            --data-dir={{ cluster_data_path | trim }}
+            --data-dir={{ cluster_data_path | trim }} \
+            --datastore-endpoint={{ k3s_datastore_endpoint | default("sqlite") }}
   when: not k3s_installed.stat.exists or force_k3s_upgrade
 
 - name: Enable k3s at system startup
