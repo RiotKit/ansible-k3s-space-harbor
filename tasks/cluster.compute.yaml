@@ -68,6 +68,14 @@
           --with-node-id
   when: not k3s_installed.stat.exists or force_k3s_upgrade
 
+- name: Add a script to allow forced agent node restart with proper clean up
+  become: yes
+  become_user: root
+  template:
+      src: usr/local/bin/k3s-force-restart.sh
+      dst: /usr/local/bin/k3s-force-restart.sh
+      mode: u+rwx,g+rx,o+rx
+
 - name: Enable k3s at system startup
   become: yes
   become_user: root
