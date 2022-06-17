@@ -45,6 +45,10 @@ kubelet_args: []
 k3s_datastore_endpoint: sqlite
 vpn_flannel_backend: wireguard
 
+# set it to true for better multi-node cluster stability
+# additionally a good practice is to keep your pods to have defined requests and limits
+noschedule_on_primary: false
+
 # =====================
 #  GIT repository for a Cluster is a SINGLE SOURCE OF TRUTH
 # =====================

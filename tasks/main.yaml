@@ -1,6 +1,9 @@
 - include: tools.yaml
   tags: tools
 
+- include: system.yaml
+  tags: system
+
 - include: cluster.primary.yaml
   tags: ['cluster', 'k3s']
   when: node_type == "primary"

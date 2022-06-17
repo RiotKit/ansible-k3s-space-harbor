@@ -54,6 +54,9 @@
           {%- for taint in node_taints %}
           --node-taint="{{ taint | trim }}" \
           {%- endfor %}
+          {%- if noschedule_on_primary %}
+          --node-taint="node-role.kubernetes.io/master" \
+          {%- endif %}
           --resolv-conf="/etc/riotkit/resolv.conf" \
           --token-file="/etc/riotkit/primary-token" \
           {%- if vpn_enabled %}
@@ -65,6 +68,8 @@
           {%- for arg in kubelet_args %}
           --kubelet-arg="{{ arg | trim }}" \
           {%- endfor %}
+          --kube-apiserver-arg="enable-admission-plugins=NodeRestriction,PodSecurityPolicy,ServiceAccount" \
+          --protect-kernel-defaults \
           --with-node-id
   when: not k3s_installed.stat.exists or force_k3s_upgrade
 

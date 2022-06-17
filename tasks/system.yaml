@@ -1,0 +1,9 @@
+- name: Add sysctl parameters
+  become: yes
+  template:
+      src: etc/sysctl.d/90-kubelet.conf
+      dst: /etc/sysctl.d/90-kubelet.conf
+
+- name: Reload sysctl configuration
+  become: yes
+  shell: "sysctl --system"
