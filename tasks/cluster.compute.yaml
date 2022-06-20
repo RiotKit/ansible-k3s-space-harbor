@@ -78,7 +78,7 @@
   become_user: root
   template:
       src: usr/local/bin/k3s-force-restart.sh
-      dst: /usr/local/bin/k3s-force-restart.sh
+      dest: /usr/local/bin/k3s-force-restart.sh
       mode: u+rwx,g+rx,o+rx
 
 - name: Enable k3s at system startup
