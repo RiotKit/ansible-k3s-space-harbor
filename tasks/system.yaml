@@ -2,7 +2,7 @@
   become: yes
   template:
       src: etc/sysctl.d/90-kubelet.conf
-      dst: /etc/sysctl.d/90-kubelet.conf
+      dest: /etc/sysctl.d/90-kubelet.conf
 
 - name: Reload sysctl configuration
   become: yes
