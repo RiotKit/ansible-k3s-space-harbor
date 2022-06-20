@@ -52,7 +52,6 @@
             --flannel-backend={{ vpn_flannel_backend }} \
             {%- endif %}
             --data-dir={{ cluster_data_path | trim }} \
-            --kube-apiserver-arg="enable-admission-plugins=NodeRestriction,PodSecurityPolicy,ServiceAccount" \
             --datastore-endpoint={{ k3s_datastore_endpoint | default("sqlite") }}
   when: not k3s_installed.stat.exists or force_k3s_upgrade
 
