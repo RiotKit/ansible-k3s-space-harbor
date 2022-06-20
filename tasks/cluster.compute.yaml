@@ -54,9 +54,6 @@
           {%- for taint in node_taints %}
           --node-taint="{{ taint | trim }}" \
           {%- endfor %}
-          {%- if noschedule_on_primary %}
-          --node-taint="node-role.kubernetes.io/master" \
-          {%- endif %}
           --resolv-conf="/etc/riotkit/resolv.conf" \
           --token-file="/etc/riotkit/primary-token" \
           {%- if vpn_enabled %}
