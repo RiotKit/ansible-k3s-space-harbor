@@ -31,5 +31,15 @@
   community.general.ufw:
       state: enabled
       policy: deny
+      interface: "{{ firewall_interface }}"
+      direction: incoming
+      logging: 'on'
+
+- name: "Allow everything on {{ flannel_iface }}"
+  become: true
+  community.general.ufw:
+      state: enabled
+      policy: allow
+      interface: "{{ flannel_iface }}"
       direction: incoming
       logging: 'on'
