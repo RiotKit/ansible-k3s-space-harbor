@@ -1,0 +1,12 @@
+- name: "Allow port for cluster peer {{ peerHostIp }}"
+  become: true
+  community.general.ufw:
+      rule: allow
+      proto: "{{ firewall_port.proto | default('tcp') }}"
+      port: "{{ firewall_port.port }}"
+      src: '{{ peerHostIp }}'
+      interface: "{{ firewall_interface }}"
+      direction: in
+  loop: "{{ firewall_ports_internal }}"
+  loop_control:
+      loop_var: firewall_port

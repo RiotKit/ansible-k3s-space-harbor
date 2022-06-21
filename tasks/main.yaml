@@ -31,7 +31,3 @@
 - include: firewall.yaml
   tags: firewall
   when: firewall_enabled
-
-- include: firewall.primary.yaml
-  tags: firewall
-  when: node_type == "primary" and firewall_enabled

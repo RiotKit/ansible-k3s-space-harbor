@@ -20,7 +20,45 @@ force_k3s_upgrade: false     # set this from CLI "-e force_k3s_upgrade=true" to 
 vpn_enabled: true            # communicate between cluster nodes over VPN, K3S will use {{ flannel_iface }} as main interface when vpn_enabled=true
 flannel_iface: wg0           # set this per node if you have multiple VPN interfaces
 canal_enabled: true
+
+# =========
+# Firewall
+# =========
 firewall_enabled: true       # install and configure UFW firewall
+firewall_interface: eth0
+firewall_inventory_hosts_group_name: cluster   # a name of a group in Ansible inventory from which take the list of hosts
+firewall_ports_internal:
+    # etcd
+    - port: 10250
+      proto: tcp
+    # Node Exporter (Prometheus/Victoria metrics)
+    - port: 9100
+      proto: tcp
+    # exposed NodePorts
+    - port: "30000:32767"
+      proto: tcp
+    - port: "30000:32767"
+      proto: udp
+    # API Server
+    - port: 6443
+      proto: tcp
+    # Ingress NGINX
+    - port: 8082
+      proto: tcp
+firewall_ports_public:
+    - port: 80
+      proto: tcp
+    - port: 443
+      proto: tcp
+    - port: 22
+      proto: tcp
+    # VPN
+    - port: 51820
+      proto: udp
+    - port: 51821
+      proto: udp
+    - port: 443
+      proto: udp
 
 # configure, if you have multiple clusters and access them by same network/VPN
 net_cluster_cidr: "10.42.0.0/16"

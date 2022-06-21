@@ -3,3 +3,33 @@
   apt:
       update_cache: true
       name: ufw
+
+- name: Disable UFW temporarily
+  become: true
+  community.general.ufw:
+      state: disabled
+
+- name: Open public ports
+  become: true
+  community.general.ufw:
+      rule: allow
+      proto: "{{ item.proto | default('tcp') }}"
+      port: "{{ item.port }}"
+      interface: "{{ firewall_interface }}"
+      direction: in
+  with_items: "{{ firewall_ports_public }}"
+
+# for each node: allow traffic on internal ports
+- name: Allow all internal ports for node
+  with_items: "{{ groups[firewall_inventory_hosts_group_name | default('cluster')] | map('extract', hostvars, ['ansible_ssh_host']) }}"
+  include: includes/firewall.internal.yaml
+  vars:
+      peerHostIp: "{{ item }}"
+
+- name: Deny everything and enable UFW
+  become: true
+  community.general.ufw:
+      state: enabled
+      policy: deny
+      direction: incoming
+      logging: 'on'
