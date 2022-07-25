@@ -1,2 +1,2 @@
 [runsc_config]
-platform = "ptrace"
+platform = "{{ runsc_platform }}"
