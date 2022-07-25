@@ -4,6 +4,12 @@
 - include: system.yaml
   tags: system
 
+- include: go.yaml
+  tags: ['go']
+
+- include: gvisor.yaml
+  tags: ['gvisor']
+
 - include: cluster.primary.yaml
   tags: ['cluster', 'k3s']
   when: node_type == "primary"

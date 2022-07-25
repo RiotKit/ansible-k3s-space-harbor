@@ -1,0 +1,60 @@
+- name: Download gVisor runsc binary
+  get_url:
+      url: https://storage.googleapis.com/gvisor/releases/release/latest/x86_64/runsc
+      dest: /usr/local/bin/runsc
+      mode: "u+rwx,g+rx,o+rx"
+
+- name: Download gVisor shim binary
+  get_url:
+      url: https://storage.googleapis.com/gvisor/releases/release/latest/x86_64/containerd-shim-runsc-v1
+      dest: /usr/local/bin/containerd-shim-runsc-v1
+      mode: "u+rwx,g+rx,o+rx"
+
+# Reconfigure containerd
+- name: Create build directory
+  file:
+      path: /tmp/gvisor-config-build
+      state: directory
+
+- name: Add helper file
+  copy:
+      src: files/gvisor/main.go
+      dest: /tmp/gvisor-config-build/main.go
+
+- name: Fetch shim configuration for proper K3s version
+  get_url:
+      url: "https://raw.githubusercontent.com/k3s-io/k3s/{{ k3s_version }}/pkg/agent/templates/templates_linux.go"
+      dest: /tmp/gvisor-config-build/templates_linux.go
+
+- name: Replace package name
+  shell: "sed -i 's/package templates/package main/g' /tmp/gvisor-config-build/templates_linux.go"
+
+- name: Generate template
+  shell: "cd /tmp/gvisor-config-build && go run ./main.go ./templates_linux.go 2> /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl"
+
+- name: Configure shim
+  template:
+      src: etc/containerd/runsc.toml
+      dest: /var/lib/rancher/k3s/agent/etc/containerd/runsc.toml
+
+- name: Append additional shim to containerd configuration
+  blockinfile:
+      path: /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl
+      block: |
+          [plugins.cri.containerd.runtimes.runsc]
+              runtime_type = "io.containerd.runsc.v1"
+          [plugins.cri.containerd.runtimes.runsc.options]
+              TypeUrl = "io.containerd.runsc.v1.options"
+              ConfigPath = "/var/lib/rancher/k3s/agent/etc/containerd/runsc.toml"
+# End of containerd reconfiguration
+
+# Only on primary node: apply the Kubernetes resource, so the runtime class will be available inside cluster
+- when: node_type == "primary"
+  block:
+    - name: Create RuntimeClass
+      template:
+          src: etc/rancher/init-resources/runsc.runtimeclass.yaml
+          dest: /etc/rancher/init-resources/runsc.runtimeclass.yaml
+
+    - name: Apply RuntimeClass
+      shell: "kubectl apply -f /etc/rancher/init-resources/runsc.runtimeclass.yaml"
