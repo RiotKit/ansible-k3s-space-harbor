@@ -21,6 +21,7 @@
       src: files/gvisor/main.go
       dest: /tmp/gvisor-config-build/main.go
 
+# IMPORTANT: containerd config file must be compatible with K3s version, so we download a matching one and extract it using a main.go wrapper
 - name: Fetch shim configuration for proper K3s version
   get_url:
       url: "https://raw.githubusercontent.com/k3s-io/k3s/{{ k3s_version }}/pkg/agent/templates/templates_linux.go"
