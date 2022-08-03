@@ -7,8 +7,8 @@
 - include: go.yaml
   tags: ['go']
 
-- include: gvisor.yaml
-  tags: ['gvisor']
+- include: shims.yaml
+  tags: ['gvisor', 'shims', 'containerd', 'crun']
 
 - include: cluster.primary.yaml
   tags: ['cluster', 'k3s']

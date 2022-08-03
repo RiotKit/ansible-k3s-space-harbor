@@ -246,3 +246,4 @@ telegraf_certs:
 # Security/Sandboxing
 # ====================
 runsc_platform: "ptrace"   # https://gvisor.dev/docs/architecture_guide/platforms/
+crun_version: "1.5"
