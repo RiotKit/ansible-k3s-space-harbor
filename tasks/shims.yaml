@@ -63,13 +63,18 @@
   lineinfile:
       path: /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl
       line: '  default_runtime_name = "crun"'
-      insertafter: "[plugins.cri.containerd]"
+      insertafter: '^\[plugins.cri.containerd\]'
 
 # End of containerd reconfiguration
 
 # Only on primary node: apply the Kubernetes resource, so the runtime class will be available inside cluster
 - when: node_type == "primary"
   block:
+    - name: Create init-resources directory
+      file:
+          path: /etc/rancher/init-resources
+          state: directory
+
     - name: Create RuntimeClass
       template:
           src: "etc/rancher/init-resources/{{ item }}"
