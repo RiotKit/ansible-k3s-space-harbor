@@ -86,8 +86,3 @@ ip link delete kube-ipvs0 || true
 rm -rf /var/lib/cni/
 iptables-save | grep -v KUBE- | grep -v CNI- | grep -v flannel | iptables-restore
 ip6tables-save | grep -v KUBE- | grep -v CNI- | grep -v flannel | ip6tables-restore
-
-
-for service in /etc/systemd/system/k3s*.service; do
-    [ -s $service ] && systemctl start $(basename $service)
-done

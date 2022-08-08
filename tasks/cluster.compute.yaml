@@ -68,13 +68,16 @@
           --with-node-id
   when: not k3s_installed.stat.exists or force_k3s_upgrade
 
-- name: Add a script to allow forced agent node restart with proper clean up
+- name: Add helper scripts
   become: yes
   become_user: root
   template:
-      src: usr/local/bin/k3s-force-restart.sh
-      dest: /usr/local/bin/k3s-force-restart.sh
+      src: usr/local/bin/{{ item }}
+      dest: /usr/local/bin/{{ item }}
       mode: u+rwx,g+rx,o+rx
+  with_items:
+      - space-harbor-force-restart.sh
+      - space-harbor-force-stop.sh
 
 - name: Enable k3s at system startup
   become: yes
