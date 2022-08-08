@@ -30,7 +30,7 @@
       owner: root
       group: root
 
-- name: Instal K3S compute node from get.k3s.io
+- name: Install K3S compute node from get.k3s.io
   become: yes
   shell: |
       export INSTALL_K3S_VERSION="{{ k3s_version }}";
