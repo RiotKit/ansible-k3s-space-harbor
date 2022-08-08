@@ -38,7 +38,7 @@
             --node-taint="{{ taint | trim }}" \
             {%- endfor %}
             {%- if noschedule_on_primary %}
-            --node-taint="node-role.kubernetes.io/master" \
+            --node-taint="node-role.kubernetes.io/master:NoSchedule" \
             {%- endif %}
             --with-node-id \
             --node-external-ip={{ node_external_ip | default(ansible_ssh_host) }} \
