@@ -33,6 +33,11 @@
       url: "https://raw.githubusercontent.com/k3s-io/k3s/{{ k3s_version }}/pkg/agent/templates/templates_linux.go"
       dest: /tmp/gvisor-config-build/templates_linux.go
 
+- name: Make sure the containerd directory exists
+  file:
+      path: /var/lib/rancher/k3s/agent/etc/containerd/
+      state: directory
+
 - name: Replace package name
   shell: "sed -i 's/package templates/package main/g' /tmp/gvisor-config-build/templates_linux.go"
 
