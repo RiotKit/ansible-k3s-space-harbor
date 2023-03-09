@@ -3,6 +3,6 @@
   environment:
       KUBECONFIG: "/etc/rancher/k3s/k3s.yaml"
   block:
-      - name: Install Cancal Network Policies
+      - name: Install Canal Network Policies
         shell: |
             kubectl apply -f https://projectcalico.docs.tigera.io/manifests/canal.yaml

@@ -1,4 +1,4 @@
-- name: Check if Traefik was already configred
+- name: Check if README is present
   stat: path=/tmp/git-repository/README.md
   register: readme_created
 

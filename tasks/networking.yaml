@@ -1,0 +1,2 @@
+- include: networking.calico-canal.yaml
+  when: canal_enabled
