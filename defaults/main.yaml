@@ -2,17 +2,17 @@
 #  Main settings
 # =====================
 
-k3s_version: "v1.23.6+k3s1"       # https://github.com/k3s-io/k3s/releases
-argocd_version: "v2.3.2"          # https://github.com/argoproj/argo-cd/releases
-secrets_version: "2.1.7"          # https://artifacthub.io/packages/helm/bitnami-labs/sealed-secrets
+k3s_version: "v1.26.1+k3s1"       # https://github.com/k3s-io/k3s/releases
+argocd_version: "v2.6.4"          # https://github.com/argoproj/argo-cd/releases
+secrets_version: "2.7.6"          # https://artifacthub.io/packages/helm/bitnami-labs/sealed-secrets
 telegraf_chart_version: "1.8.17"  # https://artifacthub.io/packages/helm/influxdata/telegraf
 traefik_chart_version: "10.19.0"  # https://artifacthub.io/packages/helm/traefik/traefik
 
 # ============================
 #  Tools installed on machine
 # ============================
-tool_helm_version: "v3.8.1"       # https://github.com/helm/helm/releases
-tool_kubeseal_version: "0.17.5"  # https://github.com/bitnami-labs/sealed-secrets/releases (notice: only versions with released asset "kubeseal-linux-amd64")
+tool_helm_version: "v3.11.2"       # https://github.com/helm/helm/releases
+tool_kubeseal_version: "0.19.5"    # https://github.com/bitnami-labs/sealed-secrets/releases (notice: only versions with released asset "kubeseal-linux-amd64")
 
 main_domain: "example.org"   # main public DNS domain of your cluster. All services will be exposed as subdomains under this domain
 timezone: "Europe/Warsaw"
