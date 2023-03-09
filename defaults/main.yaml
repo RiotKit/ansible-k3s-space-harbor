@@ -104,52 +104,6 @@ argocd_git_host: "github.com"    # same host as in cluster_git_repository.remote
 argocd_namespace: "argocd"       # better to not change
 
 
-# =====================
-#  Traefik Helm Chart
-# =====================
-traefik_subdomain: "traefik"
-traefik_password: "riotkit"
-traefik_tls_staging: "true"
-traefik_tls_email: "example@example.org"
-
-
-# allows to override "traefik_defaults" - the dictionary hashes will be merged recursively
-traefik_helm_settings: {}
-
-traefik_defaults:
-    rbac:
-        enabled: true
-    additionalArguments:
-        - "--certificatesresolvers.default.acme.email={{ traefik_tls_email }}"
-        - "--certificatesresolvers.default.acme.storage=/data/acme.json"
-        - "--certificatesresolvers.default.acme.tlschallenge=true"
-        - "--certificatesresolvers.default.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # debug
-
-    ingressRoute:
-        dashboard:
-            enabled: false
-
-    persistence:
-        enabled: true
-        name: data
-        accessMode: ReadWriteOnce
-        size: 64Mi
-        path: /data
-
-    resources:
-       requests:
-           cpu: "0"
-           memory: "50Mi"
-       limits:
-          cpu: "1"
-          memory: "150Mi"
-
-    providers:
-        kubernetesCRD:
-            enabled: true
-            allowCrossNamespace: true
-
-
 infracheck_enabled: true
 infracheck_domain: "health"
 infracheck_max_total_load_average: "2"
@@ -230,17 +184,6 @@ mail_relay_password: ""
 # ================
 secrets_enabled: true
 secrets_namespace: "kube-system"
-
-# ====================
-#  Telegraf - metrics
-# ====================
-telegraf_enabled: true
-telegraf_agent_interval: "120s"
-telegraf_socket_writer_address: "tcp://example.org:8094"
-telegraf_certs:
-    ca_crt: ...
-    tls_crt: ...
-    tls_key: ...
 
 # ====================
 # Security/Sandboxing
