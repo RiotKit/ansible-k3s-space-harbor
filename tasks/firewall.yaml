@@ -36,6 +36,7 @@
       logging: 'on'
 
 - name: "Allow everything on {{ flannel_iface }}"
+  when: vpn_enabled
   become: true
   community.general.ufw:
       state: enabled
