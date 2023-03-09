@@ -48,8 +48,11 @@
             --resolv-conf=/etc/riotkit/resolv.conf \
             {%- if cluster_api_bind_address %}
             --bind-address={{ cluster_api_bind_address }} \
-            --node-ip={{ cluster_api_bind_address | trim }}
+            --node-ip={{ cluster_api_bind_address | trim }} \
             {%- endif %}
+            {% if canal_enabled %}
+            --disable-network-policy \
+            {% endif %}
             {%- if vpn_enabled %}
             --flannel-iface={{ flannel_iface | trim }} \
             --flannel-backend={{ vpn_flannel_backend }} \
