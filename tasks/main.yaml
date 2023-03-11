@@ -10,6 +10,10 @@
 - include: shims.yaml
   tags: ['gvisor', 'shims', 'containerd', 'crun']
 
+- include: networking.admin-vpn.yaml
+  tags: ['admin-vpn', 'admin_vpn']
+  when: admin_vpn_enabled
+
 - include: cluster.primary.yaml
   tags: ['cluster', 'k3s']
   when: node_type == "primary"
@@ -22,9 +26,9 @@
   tags: sealed_secrets
   when: node_type == "primary" and secrets_enabled
 
-- include: network-policies.yaml
-  tags: network_policies
-  when: node_type == "primary" and canal_enabled
+- include: networking.yaml
+  tags: networking
+  when: node_type == "primary" and (canal_enabled or cilium_enabled)
 
 - include: repository.yaml
   tags: repository

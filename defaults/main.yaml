@@ -2,24 +2,43 @@
 #  Main settings
 # =====================
 
-k3s_version: "v1.23.6+k3s1"       # https://github.com/k3s-io/k3s/releases
-argocd_version: "v2.3.2"          # https://github.com/argoproj/argo-cd/releases
-secrets_version: "2.1.7"          # https://artifacthub.io/packages/helm/bitnami-labs/sealed-secrets
-telegraf_chart_version: "1.8.17"  # https://artifacthub.io/packages/helm/influxdata/telegraf
-traefik_chart_version: "10.19.0"  # https://artifacthub.io/packages/helm/traefik/traefik
+k3s_version: "v1.26.1+k3s1"       # https://github.com/k3s-io/k3s/releases
+argocd_version: "v2.6.4"          # https://github.com/argoproj/argo-cd/releases
+secrets_version: "2.7.6"          # https://artifacthub.io/packages/helm/bitnami-labs/sealed-secrets
+cilium_version: "1.13.0"          # https://artifacthub.io/packages/helm/cilium/cilium
 
 # ============================
 #  Tools installed on machine
 # ============================
-tool_helm_version: "v3.8.1"       # https://github.com/helm/helm/releases
-tool_kubeseal_version: "0.17.5"  # https://github.com/bitnami-labs/sealed-secrets/releases (notice: only versions with released asset "kubeseal-linux-amd64")
+tool_helm_version: "v3.11.2"       # https://github.com/helm/helm/releases
+tool_kubeseal_version: "0.19.5"    # https://github.com/bitnami-labs/sealed-secrets/releases (notice: only versions with released asset "kubeseal-linux-amd64")
 
 main_domain: "example.org"   # main public DNS domain of your cluster. All services will be exposed as subdomains under this domain
 timezone: "Europe/Warsaw"
 force_k3s_upgrade: false     # set this from CLI "-e force_k3s_upgrade=true" to upgrade the cluster with Ansible
 vpn_enabled: true            # communicate between cluster nodes over VPN, K3S will use {{ flannel_iface }} as main interface when vpn_enabled=true
+cilium_enabled: false
+
+# =======
+# Flannel
+# =======
 flannel_iface: wg0           # set this per node if you have multiple VPN interfaces
-canal_enabled: true
+
+# =============
+# Canal support
+# =============
+canal_enabled: false
+
+# =========
+# Admin VPN
+# =========
+admin_vpn_enabled: false
+admin_vpn_ip: 10.241.0.1
+admin_vpn_interface: adm0
+admin_vpn_peers: []
+    # - public_key: xxxx
+    #   ip: 10.1.2.3/32
+    #   persistent_keep_alive: 60  # optional
 
 # =========
 # Firewall
@@ -93,8 +112,16 @@ noschedule_on_primary: false
 cluster_git_repository:
     remote: "git://github.com/smthing"
     branch: "main"
+
     argocd_read_only_access_key: ""
+    argocd_read_only_user: ""
+    argocd_read_only_password: ""
+
     deployment_time_access_key: ""  # access key with permissions to write to repository (private ssh-rsa)
+    deployment_time_user: ""
+    deployment_time_password: ""
+
+
 
 # ========
 #  ArgoCD
@@ -102,52 +129,6 @@ cluster_git_repository:
 argocd_git_port: "22"            # same port as in cluster_git_repository.remote option
 argocd_git_host: "github.com"    # same host as in cluster_git_repository.remote option
 argocd_namespace: "argocd"       # better to not change
-
-
-# =====================
-#  Traefik Helm Chart
-# =====================
-traefik_subdomain: "traefik"
-traefik_password: "riotkit"
-traefik_tls_staging: "true"
-traefik_tls_email: "example@example.org"
-
-
-# allows to override "traefik_defaults" - the dictionary hashes will be merged recursively
-traefik_helm_settings: {}
-
-traefik_defaults:
-    rbac:
-        enabled: true
-    additionalArguments:
-        - "--certificatesresolvers.default.acme.email={{ traefik_tls_email }}"
-        - "--certificatesresolvers.default.acme.storage=/data/acme.json"
-        - "--certificatesresolvers.default.acme.tlschallenge=true"
-        - "--certificatesresolvers.default.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # debug
-
-    ingressRoute:
-        dashboard:
-            enabled: false
-
-    persistence:
-        enabled: true
-        name: data
-        accessMode: ReadWriteOnce
-        size: 64Mi
-        path: /data
-
-    resources:
-       requests:
-           cpu: "0"
-           memory: "50Mi"
-       limits:
-          cpu: "1"
-          memory: "150Mi"
-
-    providers:
-        kubernetesCRD:
-            enabled: true
-            allowCrossNamespace: true
 
 
 infracheck_enabled: true
@@ -232,18 +213,7 @@ secrets_enabled: true
 secrets_namespace: "kube-system"
 
 # ====================
-#  Telegraf - metrics
-# ====================
-telegraf_enabled: true
-telegraf_agent_interval: "120s"
-telegraf_socket_writer_address: "tcp://example.org:8094"
-telegraf_certs:
-    ca_crt: ...
-    tls_crt: ...
-    tls_key: ...
-
-# ====================
 # Security/Sandboxing
 # ====================
 runsc_platform: "ptrace"   # https://gvisor.dev/docs/architecture_guide/platforms/
-crun_version: "1.5"
+crun_version: "1.8.1"

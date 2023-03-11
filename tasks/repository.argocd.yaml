@@ -4,10 +4,15 @@
 
 - when: '"git_argocd" in ansible_run_tags or not argocd_configured.stat.exists'
   block:
+      - name: Make sure bootstrap directory exists
+        file:
+            path: /tmp/git-repository/bootstrap/argocd
+            state: directory
+
       - name: Place ArgoCD definition inside repository
         template:
             src: "repository/bootstrap/argocd/{{ item }}"
-            dest: /tmp/git-repository/bootstrap/argocd{{ item | regex_replace('\.j2$', '') }}
+            dest: /tmp/git-repository/bootstrap/argocd/{{ item | regex_replace('\.j2$', '') }}
         with_items:
             - kustomization.yaml.j2
             - argocd-repo-server.yaml

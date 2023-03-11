@@ -35,7 +35,18 @@
       direction: incoming
       logging: 'on'
 
+- name: "Allow everything on {{ admin_vpn_interface }}"
+  when: admin_vpn_enabled
+  become: true
+  community.general.ufw:
+      state: enabled
+      policy: allow
+      interface: "{{ admin_vpn_interface }}"
+      direction: incoming
+      logging: 'on'
+
 - name: "Allow everything on {{ flannel_iface }}"
+  when: vpn_enabled
   become: true
   community.general.ufw:
       state: enabled

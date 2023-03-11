@@ -22,27 +22,10 @@
       path: /tmp/gvisor-config-build
       state: directory
 
-- name: Add helper file to fetch containerd configuration file from K3s
-  copy:
-      src: files/gvisor/main.go
-      dest: /tmp/gvisor-config-build/main.go
-
-# IMPORTANT: containerd config file must be compatible with K3s version, so we download a matching one and extract it using a main.go wrapper
-- name: Fetch shim configuration for proper K3s version
-  get_url:
-      url: "https://raw.githubusercontent.com/k3s-io/k3s/{{ k3s_version }}/pkg/agent/templates/templates_linux.go"
-      dest: /tmp/gvisor-config-build/templates_linux.go
-
 - name: Make sure the containerd directory exists
   file:
       path: /var/lib/rancher/k3s/agent/etc/containerd/
       state: directory
-
-- name: Replace package name
-  shell: "sed -i 's/package templates/package main/g' /tmp/gvisor-config-build/templates_linux.go"
-
-- name: Generate template
-  shell: "cd /tmp/gvisor-config-build && go run ./main.go ./templates_linux.go 2> /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl"
 
 - name: Configure gVisor shim
   template:
@@ -50,24 +33,8 @@
       dest: /var/lib/rancher/k3s/agent/etc/containerd/runsc.toml
 
 - name: Register in containerd configuration
-  blockinfile:
-      path: /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl
-      block: |
-          [plugins.cri.containerd.runtimes.runsc]
-              runtime_type = "io.containerd.runsc.v1"
-          [plugins.cri.containerd.runtimes.runsc.options]
-              TypeUrl = "io.containerd.runsc.v1.options"
-              ConfigPath = "/var/lib/rancher/k3s/agent/etc/containerd/runsc.toml"
-          
-          [plugins.cri.containerd.runtimes.crun]
-              runtime_type = "io.containerd.runc.v2"
-          [plugins.cri.containerd.runtimes.crun.options]
-              BinaryName = "/usr/local/bin/crun"
-
-- name: Make crun default runtime
-  lineinfile:
-      path: /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl
-      line: '  default_runtime_name = "crun"'
-      insertafter: '^\[plugins.cri.containerd\]'
+  copy:
+      src: files/var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl
+      dest: /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl
 
 # End of containerd reconfiguration

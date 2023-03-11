@@ -16,7 +16,7 @@
       with_items:
           - src
           - src/argocd
-          - src/telegraf-certs
+          - bootstrap/argocd
           - definitions
           - definitions/infrastructure
           - definitions/applications
@@ -34,14 +34,6 @@
     - include: repository.smtp.yaml
       tags: ['git_smtp', 'git_all']
       when: mail_enabled
-
-    - include: repository.telegraf.yaml
-      tags: ['git_telegraf', 'git_all']
-      when: telegraf_enabled
-
-    - include: repository.traefik.yaml
-      tags: ['git_traefik', 'git_all']
-      when: telegraf_enabled
 
     - include: repository.readme.yaml
       tags: ['git_all']
