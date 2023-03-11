@@ -61,6 +61,7 @@
             --flannel-backend=none \
             {%- endif %}
             --data-dir={{ cluster_data_path | trim }} \
+            --kubelet-arg="cgroup-driver=cgroupfs" \
             --datastore-endpoint={{ k3s_datastore_endpoint | default("sqlite") }}
   when: not k3s_installed.stat.exists or force_k3s_upgrade
 
