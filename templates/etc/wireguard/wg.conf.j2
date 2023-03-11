@@ -1,0 +1,16 @@
+[Interface]
+PrivateKey = {{ wg_private_key }}
+Address = {{ admin_vpn_ip }}/32
+ListenPort = {{ admin_vpn_port | default('51821') }}
+
+{% for peer in admin_vpn_peers %}
+[Peer]
+PublicKey = {{ peer["public_key"] }}
+{% if "external_ip" in peer %}
+Endpoint = {{ peer["external_ip"] }}:{{ peer.get("port", "51821") }}
+{% endif %}
+AllowedIPs = {{ peer["ip"] }}/32
+{% if "persistent_keep_alive" in peer %}
+PersistentKeepAlive = {{ peer.persistent_keep_alive }}
+{% endif %}
+{% endfor %}

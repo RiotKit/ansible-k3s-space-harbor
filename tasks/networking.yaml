@@ -1,2 +1,5 @@
 - include: networking.calico-canal.yaml
   when: canal_enabled
+
+- include: networking.cilium.yaml
+  when: cilium_enabled

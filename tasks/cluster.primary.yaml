@@ -25,7 +25,7 @@
   become_user: root
   shell: |
       export INSTALL_K3S_VERSION="{{ k3s_version | trim }}";
-      curl -sfL https://get.k3s.io | bash -s - --no-deploy traefik \
+      curl -sfL https://get.k3s.io | bash -s - --disable traefik \
             --cluster-cidr={{ net_cluster_cidr | trim }} \
             --service-cidr={{ net_services_cidr | trim }} \
             --node-name="{{ node_type }}" \
@@ -42,20 +42,23 @@
             {%- endif %}
             --with-node-id \
             --node-external-ip={{ node_external_ip | default(ansible_ssh_host) }} \
-            {%- if node_internal_ip %}
+            {%- if node_internal_ip is defined and node_internal_ip %}
             --node-ip={{ node_internal_ip | trim }} \
             {%- endif %} \
             --resolv-conf=/etc/riotkit/resolv.conf \
-            {%- if cluster_api_bind_address %}
+            {%- if cluster_api_bind_address is defined and cluster_api_bind_address %}
             --bind-address={{ cluster_api_bind_address }} \
             --node-ip={{ cluster_api_bind_address | trim }} \
             {%- endif %}
-            {% if canal_enabled %}
+            {%- if canal_enabled or cilium_enabled %}
             --disable-network-policy \
-            {% endif %}
-            {%- if vpn_enabled %}
-            --flannel-iface={{ flannel_iface | trim }} \
-            --flannel-backend={{ vpn_flannel_backend }} \
+            {%- endif %}
+            {%- if vpn_enabled and not cilium_enabled %}
+                --flannel-iface={{ flannel_iface | trim }} \
+                --flannel-backend={{ vpn_flannel_backend }} \
+            {%- endif %}
+            {%- if cilium_enabled %}
+            --flannel-backend=none \
             {%- endif %}
             --data-dir={{ cluster_data_path | trim }} \
             --datastore-endpoint={{ k3s_datastore_endpoint | default("sqlite") }}

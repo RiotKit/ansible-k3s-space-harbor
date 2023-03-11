@@ -5,8 +5,7 @@
 k3s_version: "v1.26.1+k3s1"       # https://github.com/k3s-io/k3s/releases
 argocd_version: "v2.6.4"          # https://github.com/argoproj/argo-cd/releases
 secrets_version: "2.7.6"          # https://artifacthub.io/packages/helm/bitnami-labs/sealed-secrets
-telegraf_chart_version: "1.8.17"  # https://artifacthub.io/packages/helm/influxdata/telegraf
-traefik_chart_version: "10.19.0"  # https://artifacthub.io/packages/helm/traefik/traefik
+cilium_version: "1.13.0"          # https://artifacthub.io/packages/helm/cilium/cilium
 
 # ============================
 #  Tools installed on machine
@@ -18,8 +17,28 @@ main_domain: "example.org"   # main public DNS domain of your cluster. All servi
 timezone: "Europe/Warsaw"
 force_k3s_upgrade: false     # set this from CLI "-e force_k3s_upgrade=true" to upgrade the cluster with Ansible
 vpn_enabled: true            # communicate between cluster nodes over VPN, K3S will use {{ flannel_iface }} as main interface when vpn_enabled=true
+cilium_enabled: false
+
+# =======
+# Flannel
+# =======
 flannel_iface: wg0           # set this per node if you have multiple VPN interfaces
-canal_enabled: true
+
+# =============
+# Canal support
+# =============
+canal_enabled: false
+
+# =========
+# Admin VPN
+# =========
+admin_vpn_enabled: false
+admin_vpn_ip: 10.241.0.1
+admin_vpn_interface: adm0
+admin_vpn_peers: []
+    # - public_key: xxxx
+    #   ip: 10.1.2.3/32
+    #   persistent_keep_alive: 60  # optional
 
 # =========
 # Firewall
@@ -189,4 +208,4 @@ secrets_namespace: "kube-system"
 # Security/Sandboxing
 # ====================
 runsc_platform: "ptrace"   # https://gvisor.dev/docs/architecture_guide/platforms/
-crun_version: "1.5"
+crun_version: "1.8.1"

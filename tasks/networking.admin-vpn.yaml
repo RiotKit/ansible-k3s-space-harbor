@@ -1,0 +1,69 @@
+- name: Install wireguard tools
+  package:
+      name: wireguard-tools
+      state: present
+
+- set_fact:
+      wg_conf_path: "/etc/wireguard/{{ admin_vpn_interface }}.conf"
+
+- name: Check if keypair was already generated
+  command: 'grep -q "PrivateKey" {{ wg_conf_path }}'
+  register: keypair_presence
+  check_mode: no
+  ignore_errors: yes
+
+- debug:
+      var: "{{ keypair_presence.rc }}"
+
+# First time it will create a private key and store it into the *.conf file
+# So in next step that key could be re-readed (for consistency)
+- name: Generate new keypair (if keypair was not already generated)
+  when: keypair_presence.rc > 0
+  block:
+      - name: Generate private key
+        register: privkey_gen
+        shell: "wg genkey"
+
+      - name: Write minimalist WireGuard template
+        template:
+            src: templates/etc/wireguard/minimal-wg.conf.j2
+            dest: "{{ wg_conf_path }}"
+            owner: root
+
+- name: Read private key
+  shell: |
+      python3 -c "import configparser; c = configparser.ConfigParser(strict=False); c.read('/etc/wireguard/{{ admin_vpn_interface }}.conf'); print(c['Interface']['PrivateKey'])"
+  register: private_key
+
+- name: Retrieve private key
+  set_fact:
+      wg_private_key: "{{ private_key.stdout | trim }}"
+
+- name: Extract public key
+  register: public_key
+  shell: 'echo "{{ wg_private_key }}" | wg pubkey'
+
+- set_fact:
+      wg_public_key: "{{ public_key.stdout }}"
+
+# --------------------------------------------------------------------------------------
+# At this stage every node should have populated facts with PUBLIC KEY and PRIVATE KEY
+# so the template will iterate over the nodes and fetch required PUBLIC KEYS
+# --------------------------------------------------------------------------------------
+- name: Generate configuration
+  template:
+      src: templates/etc/wireguard/wg.conf.j2
+      dest: "{{ wg_conf_path }}"
+      owner: root
+
+- name: Allow Wireguard on the firewall (UFW)
+  ufw:
+      rule: allow
+      port: "{{ admin_vpn_port | default('51821') }}"
+
+- name: Create, enable and start systemd service
+  systemd:
+      name: "wg-quick@{{ admin_vpn_interface }}.service"
+      daemon_reload: true
+      enabled: true
+      state: restarted

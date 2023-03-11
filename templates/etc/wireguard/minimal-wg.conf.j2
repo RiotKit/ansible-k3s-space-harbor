@@ -1,0 +1,4 @@
+[Interface]
+PrivateKey = {{ privkey_gen.stdout }}
+Address = {{ admin_vpn_ip }}/32
+ListenPort = {{ admin_vpn_port | default('51821') }}
