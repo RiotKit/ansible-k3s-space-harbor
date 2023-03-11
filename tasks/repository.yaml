@@ -16,6 +16,7 @@
       with_items:
           - src
           - src/argocd
+          - bootstrap/argocd
           - definitions
           - definitions/infrastructure
           - definitions/applications

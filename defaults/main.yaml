@@ -112,8 +112,16 @@ noschedule_on_primary: false
 cluster_git_repository:
     remote: "git://github.com/smthing"
     branch: "main"
+
     argocd_read_only_access_key: ""
+    argocd_read_only_user: ""
+    argocd_read_only_password: ""
+
     deployment_time_access_key: ""  # access key with permissions to write to repository (private ssh-rsa)
+    deployment_time_user: ""
+    deployment_time_password: ""
+
+
 
 # ========
 #  ArgoCD

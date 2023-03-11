@@ -10,11 +10,13 @@
             mode: "u+rwx,g+rx,o+rx"
 
       - name: "Retrieve fingerprint for GIT host"
+        when: "'git@' in cluster_git_repository.remote"
         shell: "ssh-keyscan -p {{ argocd_git_port }} {{ argocd_git_host }}"
         register: ssh_known_host_results
         ignore_errors: yes
 
       - name: "Add GIT address on host to known_hosts"
+        when: "'git@' in cluster_git_repository.remote"
         known_hosts:
             name: "[{{ argocd_git_host }}]:{{ argocd_git_port }}"
             key: "{{ ssh_known_host_results.stdout }}"
@@ -47,18 +49,27 @@
             argocd login --core
 
       - name: "Copy read-only GIT key"
+        when: "'git@' in cluster_git_repository.remote"
         copy:
             content: "{{ cluster_git_repository.argocd_read_only_access_key }}"
             dest: "/tmp/.rkt-ro-git.rsa"
             mode: "0600"
 
-      - name: "Add GIT credentials"
+      - name: "Add GIT credentials (GIT+SSH)"
         tags: ['sync']
+        when: "'git@' in cluster_git_repository.remote"
         shell: |
             argocd repocreds add {{ cluster_git_repository.remote }} --ssh-private-key-path /tmp/.rkt-ro-git.rsa --upsert
 
+      - name: "Add GIT credentials (GIT+HTTPS)"
+        tags: ['sync']
+        when: "'git@' not in cluster_git_repository.remote"
+        shell: |
+            argocd repocreds add {{ cluster_git_repository.remote }} --username {{ cluster_git_repository.argocd_read_only_user }} --password {{ cluster_git_repository.argocd_read_only_password }}  --upsert
+
       - name: "Add GIT-SSH to known hosts"
         tags: ['sync']
+        when: "'git@' in cluster_git_repository.remote"
         shell: |
             cat /etc/ssh/ssh_known_hosts | argocd cert add-ssh --batch 
 
