@@ -26,6 +26,8 @@
   shell: |
       export INSTALL_K3S_VERSION="{{ k3s_version | trim }}";
       curl -sfL https://get.k3s.io | bash -s - --disable traefik \
+            --disable-helm-controller \
+            --disable-cloud-controller \
             --cluster-cidr={{ net_cluster_cidr | trim }} \
             --service-cidr={{ net_services_cidr | trim }} \
             --node-name="{{ node_type }}" \
