@@ -18,6 +18,7 @@ timezone: "Europe/Warsaw"
 force_k3s_upgrade: false     # set this from CLI "-e force_k3s_upgrade=true" to upgrade the cluster with Ansible
 vpn_enabled: true            # communicate between cluster nodes over VPN, K3S will use {{ flannel_iface }} as main interface when vpn_enabled=true
 cilium_enabled: false
+k3s_default_runtime: "runc"  # runc or crun - runc is more stable on most systems, runc is more lightweight
 
 # =======
 # Flannel
