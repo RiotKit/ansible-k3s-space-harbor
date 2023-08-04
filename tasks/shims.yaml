@@ -41,6 +41,6 @@
   replace:
       path: /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl
       regexp: 'default_runtime_name = \"(.*)\"'
-      replace: "default_runtime_name = {{ k3s_default_runtime }}"
+      replace: "default_runtime_name = \"{{ k3s_default_runtime }}\""
 
 # End of containerd reconfiguration
