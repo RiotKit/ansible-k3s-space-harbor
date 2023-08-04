@@ -65,7 +65,6 @@
           {%- for arg in kubelet_args %}
           --kubelet-arg="{{ arg | trim }}" \
           {%- endfor %}
-          --kubelet-arg="cgroup-driver=cgroupfs" \
           --with-node-id
   when: not k3s_installed.stat.exists or force_k3s_upgrade
 
