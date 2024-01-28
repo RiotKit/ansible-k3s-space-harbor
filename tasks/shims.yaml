@@ -16,12 +16,6 @@
       dest: /usr/local/bin/containerd-shim-runsc-v1
       mode: "u+rwx,g+rx,o+rx"
 
-# Reconfigure containerd
-- name: Create build directory
-  file:
-      path: /tmp/gvisor-config-build
-      state: directory
-
 - name: Make sure the containerd directory exists
   file:
       path: /var/lib/rancher/k3s/agent/etc/containerd/
@@ -36,11 +30,5 @@
   copy:
       src: files/var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl
       dest: /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl
-
-- name: Set default runtime
-  replace:
-      path: /var/lib/rancher/k3s/agent/etc/containerd/config.toml.tmpl
-      regexp: 'default_runtime_name = \"(.*)\"'
-      replace: "default_runtime_name = \"{{ k3s_default_runtime }}\""
 
 # End of containerd reconfiguration

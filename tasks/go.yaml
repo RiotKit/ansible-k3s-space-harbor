@@ -1,4 +1,0 @@
-- name: Install Go language
-  apt:
-      name: golang
-      state: present
