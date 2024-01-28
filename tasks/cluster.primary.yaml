@@ -23,6 +23,7 @@
 - name: Install K3S primary from get.k3s.io
   become: yes
   become_user: root
+  # language=bash
   shell: |
       export INSTALL_K3S_VERSION="{{ k3s_version | trim }}";
       curl -sfL https://get.k3s.io | bash -s - --disable traefik \
@@ -52,15 +53,9 @@
             --bind-address={{ cluster_api_bind_address }} \
             --node-ip={{ cluster_api_bind_address | trim }} \
             {%- endif %}
-            {%- if canal_enabled or cilium_enabled %}
-            --disable-network-policy \
-            {%- endif %}
-            {%- if vpn_enabled and not cilium_enabled %}
+            {%- if vpn_enabled %}
                 --flannel-iface={{ flannel_iface | trim }} \
                 --flannel-backend={{ vpn_flannel_backend }} \
-            {%- endif %}
-            {%- if cilium_enabled %}
-            --flannel-backend=none \
             {%- endif %}
             --data-dir={{ cluster_data_path | trim }} \
             --kubelet-arg="cgroup-driver=cgroupfs" \

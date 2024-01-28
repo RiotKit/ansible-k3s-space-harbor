@@ -1,4 +1,0 @@
-- name: Delete repository key
-  file:
-      path: "/tmp/.rkt-git.rsa"
-      state: absent

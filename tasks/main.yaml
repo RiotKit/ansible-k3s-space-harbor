@@ -22,22 +22,6 @@
   tags: ['cluster', 'k3s']
   when: node_type != "primary"
 
-- include: sealed_secrets.yaml
-  tags: sealed_secrets
-  when: node_type == "primary" and secrets_enabled
-
-- include: networking.yaml
-  tags: networking
-  when: node_type == "primary" and (canal_enabled or cilium_enabled)
-
-- include: repository.yaml
-  tags: repository
-  when: node_type == "primary"
-
-- include: argocd.yaml
-  tags: argocd
-  when: node_type == "primary"
-
 - include: firewall.yaml
   tags: firewall
   when: firewall_enabled
