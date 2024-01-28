@@ -2,17 +2,16 @@
 #  Main settings
 # =====================
 
-k3s_version: "v1.26.1+k3s1"       # https://github.com/k3s-io/k3s/releases
+k3s_version: " v1.28.5+k3s1"       # https://github.com/k3s-io/k3s/releases
 
 # ============================
 #  Tools installed on machine
 # ============================
-tool_helm_version: "v3.13.0"       # https://github.com/helm/helm/releases
-tool_kubeseal_version: "0.19.5"    # https://github.com/bitnami-labs/sealed-secrets/releases (notice: only versions with released asset "kubeseal-linux-amd64")
+tool_helm_version: "v3.14.0"       # https://github.com/helm/helm/releases
+tool_kubeseal_version: "0.25.0"    # https://github.com/bitnami-labs/sealed-secrets/releases (notice: only versions with released asset "kubeseal-linux-amd64")
 
 timezone: "Europe/Warsaw"
 force_k3s_upgrade: false     # set this from CLI "-e force_k3s_upgrade=true" to upgrade the cluster with Ansible
-k3s_default_runtime: "runc"  # runc or crun - runc is more stable on most systems, runc is more lightweight
 
 # ========================================================
 # Flannel + cross-node VPN
@@ -33,6 +32,10 @@ admin_vpn_enabled: false
 admin_vpn_ip: 10.241.0.1
 admin_vpn_interface: adm0
 admin_vpn_peers: []
+    # ----------------------------------------------------------------------------------------------
+    # To generate a key pair - on your computer do: wg genkey > ~/wg.priv; cat ~/wg.priv | wg pubkey
+    # ----------------------------------------------------------------------------------------------
+    #
     # - public_key: xxxx
     #   ip: 10.1.2.3/32
     #   persistent_keep_alive: 60  # optional
@@ -43,6 +46,9 @@ admin_vpn_peers: []
 firewall_enabled: true       # install and configure UFW firewall
 firewall_interface: eth0
 firewall_inventory_hosts_group_name: cluster   # a name of a group in Ansible inventory from which take the list of hosts
+# ---------------------------------------------------------------------------
+# Internal ports = ports available between nodes, not exposed to the internet
+# ---------------------------------------------------------------------------
 firewall_ports_internal:
     # etcd
     - port: 10250
@@ -61,6 +67,9 @@ firewall_ports_internal:
     # Ingress NGINX
     - port: 8082
       proto: tcp
+# --------------------------------------
+# Ports exposed to the public (internet)
+# --------------------------------------
 firewall_ports_public:
     - port: 80
       proto: tcp
@@ -96,6 +105,10 @@ primary_api_allowed_ips:
     - "{{ vpn_cidr }}"
 kubelet_args: []
 # - "--eviction-hard=memory.available<350Mi,nodefs.available<20Gi"
+
+# ---------------------------------------
+# Database: https://docs.k3s.io/datastore
+# ---------------------------------------
 k3s_datastore_endpoint: sqlite
 
 # set it to true for better multi-node cluster stability
@@ -106,4 +119,4 @@ noschedule_on_primary: false
 # Security/Sandboxing
 # ====================
 runsc_platform: "ptrace"   # https://gvisor.dev/docs/architecture_guide/platforms/
-crun_version: "1.8.1"
+crun_version: "1.14"
