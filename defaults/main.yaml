@@ -2,7 +2,7 @@
 #  Main settings
 # =====================
 
-k3s_version: " v1.28.5+k3s1"       # https://github.com/k3s-io/k3s/releases
+k3s_version: "v1.28.5+k3s1"       # https://github.com/k3s-io/k3s/releases
 
 # ============================
 #  Tools installed on machine
